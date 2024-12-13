@@ -97,14 +97,15 @@
 			<canvas class='creator-canvas box-shadow' id='previewCanvas' width='1005' height='1407'></canvas>
 			<div class='creator-menu box-shadow'>
 				<div id='creator-menu-tabs' class='creator-menu-tabs'>
+					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "import")'>Save/Load</h3>
 					<h3 class='selectable readable-background selected' onclick='toggleCreatorTabs(event, "frame")'>Frame</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "text")'>Text</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "art")'>Art</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "setSymbol")'>Set Symbol</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "watermark")'>Watermark</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "bottomInfo")'>Collector</h3>
-					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "import")'>Import/Save</h3>
-					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "tutorial"); loadTutorialVideo();'>Tutorial</h3>
+					
+					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, downloadCard())'>Download</h3>
 				</div>
 				<div id='creator-menu-sections' class='margin-bottom'>
 					<div id='creator-menu-frame'>
@@ -637,7 +638,19 @@
 					</div>
 					<div id='creator-menu-import' class='hidden'>
 						<div class='readable-background margin-bottom padding'>
-							<h5 class='padding margin-bottom input-description'>Import a real card by name</h5>
+							<h5 class='padding margin-bottom input-description'>Etsy Order Folder</h5>
+							<div class="file-browser">
+								<div class="file-path" id="currentPath"></div>
+								<button onclick="autoSaveToFile()">Select Directory</button>
+								<div id="fileList" style="margin-top: 10px; border: 1px solid #ccc; padding: 10px; max-height: 400px; overflow-y: auto;"></div>
+							</div>
+						
+							
+							
+							
+						</div>
+						<div class='readable-background margin-bottom padding'>
+							<h2 class='padding margin-bottom input-description'>Import a real card by name</h2>
 							<input id='import-name' class='input margin-bottom' type='text' onchange='importChanged();' placeholder='Enter Card Name'>
 							<label class='checkbox-container input margin-bottom'>Include all unique prints as options
 								<input id='importAllPrints' type='checkbox' onchange="importChanged();">
@@ -665,44 +678,18 @@
 							<h5 class='padding margin-bottom input-description'>Save your current card</h5>
 							<button class='input margin-bottom' onclick='saveCard();'>Save Card</button>
 							<h5 class='padding margin-bottom input-description'>Load a saved card</h5>
-							<select id='load-card-options' class='input margin-bottom' type='text' onchange='loadCard(this.value);'></select>
-							<h5 class='padding margin-bottom input-description'>Delete selected card</h5>
-							<button class='input' onclick='deleteCard();'>Delete Card</button>
-						</div>
-						<div class='readable-background padding margin-bottom'>
-							<h5 class='padding margin-bottom input-description'>Download all saved cards</h5>
-							<button class='input margin-bottom' onclick='downloadSavedCards();'>Download All</button>
-							<h5 class='padding margin-bottom input-description'>Upload previously downloaded file of saved cards (downloaded from above)</h5>
-							<input type='file' accept='.cardconjurer,.txt' class='input margin-bottom' oninput='uploadSavedCards(event);'>
-							<h5 class='padding margin-bottom input-description'>Delete ALL saved cards</h5>
-							<button class='input margin-bottom' onclick='deleteSavedCards();'>Delete All</button>
-						</div>
-						<div class='readable-background padding margin-bottom'>
-							<h5 class='collapsible collapsed padding input-description' onclick='toggleCollapse(event);'>
-								How are my cards saved?
-							</h5>
-							<div class='padding'>
-								<h5 class='margin-top'>Cards are saved on your computer under your browser's localstorage, which usually has a limit of 5MB and cannot be changed.</h5>
-								<h5 class='margin-top'>Unfortunately, this means that if you save a lot of cards, you could run out of space.</h5>
-								<h5 class='margin-top'>Your localstorage runs out of space especially fast when you upload images directly from your computer, because the image itself has to be saved. However, if possible, uploading images via URL will save massive amounts of space, allowing you to save many more cards.</h5>
-								<h5 class='margin-top'>And if you do run out of space, don't worry! You can download all saved cards then delete all saved cards,  freeing up all 5MB of space. And when you'd like to edit the cards you previously downloaded/deleted, you can reupload them via the file upload (under "Upload previously downloaded cards").</h5>
+							<div class='drop-area'>
+								<h5 class='margin-bottom padding input-description'>Drag and drop masks to add</h5>
+								<input type='file' accept='.cardconjurer' placeholder='Raw Card File Upload' class='input' onchange='loadCardFromFile(event)'>
 							</div>
+							
+							
+							
 						</div>
+						
+						
 					</div>
-					<div id='creator-menu-tutorial' class='hidden'>
-						<!-- <div class='padding readable-background margin-bottom'>
-							<h5 class='padding input-description'>This video is currently outdated, but still reflects the general process for making cards</h5>
-						</div> -->
-						<!-- <div class='padding readable-background margin-bottom'>
-							<h5 class='padding input-description'>The biggest difference is that you must click the "Load Frame Version" button after selecting your frame pack to load necessary details, such as text placement.</h5>
-						</div> -->
-						<div class='padding readable-background margin-bottom'>
-							<h5 class='padding input-description'>Here is a tutorial that covers the basics of using Card Conjurer:</h5>
-						</div>
-						<div class='video'>
-							<iframe width="560" height="315" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>
-						</div>
-					</div>
+					
 				</div>
 				<div class='readable-background padding margin-bottom'>
 					<h5 class='padding input-description'>Automatically update frame</h5>

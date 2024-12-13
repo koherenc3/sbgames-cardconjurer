@@ -431,31 +431,19 @@ a.underline {
 .main-menu > h2 {
 	margin-top: 4rem;
 }
-/*notifications*/
-.notification-container {
-	position: fixed;
-	z-index: 10;
-	bottom: 0;
-	left: 1.5rem;
-	width: calc(100vw - 3rem);
-	max-height: 75vh;
-	overflow-y: scroll;
-	transition: 0.5s;
+/*card file loader*/
+.card-files-section {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
 }
-.notification {
-	border-top: 0.25rem solid var(--color-selected);
-	background: var(--input-background);
-	display: grid;
-	grid-template-columns: auto 2rem;
-	transition: 0.5s;
-}
-.notification > h3 {
-	text-align: center;
-	user-select: none;
-	cursor: pointer;
-}
-.notification.hidden {
-	opacity: 0;
+
+.card-files-dropdown {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 4px;
 }
 /*Inputs*/
 .input {
@@ -693,6 +681,9 @@ textarea.input {
 	max-width: 750px;
 	width: 100vw;
 	height: auto;
+	background-size: auto;
+	background-image: url('../img/transparentGrid.png');
+	background-repeat: repeat;
 	/*backdrop-filter: hue-rotate(80deg);*/
 }
 .creator-menu {
@@ -934,4 +925,26 @@ textarea.input {
 	grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 	grid-gap: 0.5rem;
 	padding: 1rem 2rem;
+}
+/*directory controls*/
+.directory-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.directory-dropdown {
+    padding: 5px;
+    min-width: 200px;
+}
+
+.directory-button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.directory-label {
+    font-style: italic;
+    color: #666;
 }

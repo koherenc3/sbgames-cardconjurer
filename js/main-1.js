@@ -8,7 +8,7 @@ function toggleMenu() {
 		document.querySelector('.menu').classList.add('menu-visible');
 	}
 }
-function notify(message = '', seconds) {
+function notify2(message = '', seconds) {
 	var notification = document.createElement('div');
 	notification.classList = 'notification padding';
 	var notificationMessage = document.createElement('h4');
@@ -23,7 +23,7 @@ function notify(message = '', seconds) {
 		setTimeout(function(){close.click();}, seconds * 1000)
 	}
 }
-function closeNotification(event) {
+function closeNotification2(event) {
 	var target = event.target.closest('.notification');
 	target.classList.add('hidden');
 	setTimeout(function(){target.remove();}, 500);
@@ -32,6 +32,102 @@ window.onload = function() {
 	Array.from(document.querySelectorAll('input')).forEach(element => {
 		element.autocomplete = 'off';
 	});
+}
+
+function notify(message = '', seconds) {
+    // First check if notification container exists, if not create it
+    let container = document.querySelector('.notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+        
+        // Add the CSS for the container if not already present
+        const style = document.createElement('style');
+        style.textContent = `
+            .notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+            }
+            
+            .notification {
+                background: white;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                margin-bottom: 10px;
+                padding: 15px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                min-width: 200px;
+            }
+            
+            .notification h4 {
+                margin: 0;
+                padding-right: 20px;
+				color: #000000;
+            }
+            
+            .notification h3 {
+                cursor: pointer;
+                margin: 0;
+                color: #666;
+				color: #000000;
+            }
+            
+            .notification h3:hover {
+                color: #000000;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'notification padding';
+    
+    // Add message
+    const notificationMessage = document.createElement('h4');
+    notificationMessage.innerHTML = message;
+    notification.appendChild(notificationMessage);
+    
+    // Add close button
+    const close = document.createElement('h3');
+    close.innerHTML = 'X';
+    close.onclick = closeNotification;
+    notification.appendChild(close);
+    
+    // Add to container
+    container.appendChild(notification);
+    
+    // Auto close if seconds specified
+    if (seconds) {
+        setTimeout(() => {
+            try {
+                close.click();
+            } catch (e) {
+                console.warn('Could not auto-close notification:', e);
+            }
+        }, seconds * 1000);
+    }
+
+    // Close notification function
+    function closeNotification() {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => {
+            try {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            } catch (e) {
+                console.warn('Error removing notification:', e);
+            }
+        }, 300);
+    }
 }
 
 // Drop to upload
@@ -78,8 +174,11 @@ async function uploadFiles(filesRaw, destination, otherParams = '') {
 	files.forEach(file => {
 		var reader = new FileReader();
 		reader.onloadend = function () {
-			if (otherParams.includes('filename')) {
-				otherParams = 'filename=' + file.name;
+			console.log(otherParams);
+			if (otherParams != null){
+				if (otherParams.includes('filename')) {
+					otherParams = 'filename=' + file.name;
+				}
 			}
 			destination(reader.result, otherParams);
 		}

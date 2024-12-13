@@ -1,5 +1,10 @@
 //URL Params
 var params = new URLSearchParams(window.location.search);
+
+const dirHandleMap = new Map();
+let savedDirHandle = null;
+const MAX_RECENT_DIRS = 5;
+
 const debugging = params.get('debug') != null;
 if (debugging) {
 	alert('debugging - 4.0');
@@ -40,10 +45,10 @@ const highResScale = 1.34;
 // 	return value;
 // }
 function getStandardWidth() {
-	return 2010;
+	return 1500;
 }
 function getStandardHeight() {
-	return 2814;
+	return 2100;
 }
 
 //card object
@@ -3334,6 +3339,7 @@ function textEdited() {
 	card.text[Object.keys(card.text)[selectedTextIndex]].text = curlyQuotes(document.querySelector('#text-editor').value);
 	drawTextBuffer();
 	autoFrameBuffer();
+	
 }
 function fontSizedEdited() {
 	card.text[Object.keys(card.text)[selectedTextIndex]].fontSize = document.querySelector('#text-editor-font-size').value;
@@ -4103,6 +4109,7 @@ function artEdited() {
 	card.artY = document.querySelector('#art-y').value / card.height;
 	card.artZoom = document.querySelector('#art-zoom').value / 100;
 	card.artRotate = document.querySelector('#art-rotate').value;
+	
 	drawCard();
 }
 function autoFitArt() {
@@ -4658,9 +4665,6 @@ function drawCard() {
 }
 //DOWNLOADING
 function downloadCard(alt = false, jpeg = false) {
-	if (card.infoArtist.replace(/ /g, '') == '' && !card.artSource.includes('/img/blank.png') && !card.artZoom == 0) {
-		notify('You must credit an artist before downloading!', 5);
-	} else {
 		// Prep file information
 		var imageDataURL;
 		var imageName = getCardName();
@@ -4689,8 +4693,9 @@ function downloadCard(alt = false, jpeg = false) {
 			downloadElement.click();
 			downloadElement.remove();
 		}
-	}
+	
 }
+
 //IMPORT/SAVE TAB
 function importCard(cardObject) {
 	scryfallCard = cardObject;
@@ -4714,6 +4719,8 @@ function importCard(cardObject) {
 	});
 	changeCardIndex();
 }
+
+
 
 function scryfallCardFromText(text) {
 	var lines = text.trim().split("\n");
@@ -5014,50 +5021,273 @@ function importChanged() {
 	var unique = document.querySelector('#importAllPrints').checked ? 'prints' : '';
 	fetchScryfallData(document.querySelector("#import-name").value, importCard, unique);
 }
-function saveCard(saveFromFile) {
-	var cardKeys = JSON.parse(localStorage.getItem('cardKeys')) || [];
-	var cardKey, cardToSave;
-	if (saveFromFile) {
-		cardKey = saveFromFile.key;
-	} else {
-		cardKey = getCardName();
-	}
-	if (!saveFromFile) {
-		cardKey = prompt('Enter the name you would like to save your card under:', cardKey);
-		if (!cardKey) {return null;}
-	}
-	cardKey = cardKey.trim();
-	if (cardKeys.includes(cardKey)) {
-		if (!confirm('Would you like to overwrite your card previously saved as "' + cardKey + '"?\n(Clicking "cancel" will affix a version number)')) {
-			var originalCardKey = cardKey;
-			var cardKeyNumber = 1;
-			while (cardKeys.includes(cardKey)) {
-				cardKey = originalCardKey + ' (' + cardKeyNumber + ')';
-				cardKeyNumber ++;
-			}
-		}
-	}
-	if (saveFromFile) {
-		cardToSave = saveFromFile.data;
-	} else {
-		cardToSave = JSON.parse(JSON.stringify(card));
-		cardToSave.frames.forEach(frame => {
-			delete frame.image;
-			frame.masks.forEach(mask => delete mask.image);
-		});
-	}
-	try {
-		localStorage.setItem(cardKey, JSON.stringify(cardToSave));
-		if (!cardKeys.includes(cardKey)) {
-			cardKeys.push(cardKey);
-			cardKeys.sort();
-			localStorage.setItem('cardKeys', JSON.stringify(cardKeys));
-			loadAvailableCards(cardKeys);
-		}
-	} catch (error) {
-		notify('You have exceeded your 5MB of local storage, and your card has failed to save. If you would like to continue saving cards, please download all saved cards, then delete all saved cards to free up space.<br><br>Local storage is most often exceeded by uploading large images directly from your computer. If possible/convenient, using a URL avoids the need to save these large images.<br><br>Apologies for the inconvenience.');
-	}
+
+//New Function to Save Card to .cardconjurer file
+async function saveCard(saveFromFile) {
+    console.log("in SaveCard");
+    var cardKey, cardToSave;
+    
+    if (saveFromFile) {
+        cardKey = saveFromFile.key;
+    } else {
+		console.log("in cardKey else");
+        cardKey = getCardName();
+    }
+    
+    // Get filename from user if not provided
+    if (!cardKey) {
+
+        cardKey = prompt('Enter the name you would like to save your card under:', cardKey);
+        if (!cardKey) {return null;}
+    }
+    
+    cardKey = cardKey.trim();
+
+    // Prepare card data
+    if (saveFromFile) {
+        cardToSave = saveFromFile.data;
+    } else {
+        cardToSave = JSON.parse(JSON.stringify(card));
+        cardToSave.frames.forEach(frame => {
+            delete frame.image;
+            frame.masks.forEach(mask => delete mask.image);
+        });
+    }
+
+    try {
+		console.log("in saveCard() - first try block");
+        // Check if we have a valid directory handle
+        if (!savedDirHandle) {
+			console.log("in saveCard() - savedDir found");
+            await rememberDirectory();
+            if (!savedDirHandle) {
+                throw new Error('No directory selected for saving');
+            }
+        }
+
+        // Create a Blob containing the card data
+        const blob = new Blob([JSON.stringify(cardToSave, null, 2)], {type: 'application/json'});
+        
+        // Save to the selected directory using the File System API
+        const filename = `${cardKey}.cardconjurer`;
+        const fileHandle = await savedDirHandle.getFileHandle(filename, {create: true});
+        const writable = await fileHandle.createWritable();
+		
+        await writable.write(blob);
+	
+        await writable.close();
+		
+        
+        // Notify user of successful save
+		
+        notify(`Card "${cardKey}" has been saved to ${savedDirHandle.name}`, 5);
+		
+        
+    } catch (error) {
+        // If directory access fails, fall back to download method
+        if (error.name === 'NotAllowedError' || error.message.includes('directory')) {
+            try {
+                // Create link to download
+                const downloadLink = document.createElement('a');
+                downloadLink.download = `${cardKey}.cardconjurer`; 
+                downloadLink.href = window.URL.createObjectURL(new Blob([JSON.stringify(cardToSave, null, 2)], {type: 'application/json'}));
+                
+                // Trigger download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                
+                // Cleanup
+                window.URL.revokeObjectURL(downloadLink.href);
+                downloadLink.remove();
+                
+                notify(`Card "${cardKey}" has been downloaded (directory access failed)`, 3);
+            } catch (downloadError) {
+                notify('Failed to save card: ' + downloadError.message);
+                console.error('Save failed:', downloadError);
+            }
+        } else {
+            notify('Failed to save card: ' + error.message);
+            console.error('Save failed:', error);
+        }
+    }
 }
+
+async function listCardFiles() {
+    const dropdown = document.getElementById('card-files-dropdown');
+    if (!dropdown) return;
+
+    // Clear existing options
+    while (dropdown.options.length > 1) {
+        dropdown.remove(1);
+    }
+
+    if (!savedDirHandle) {
+        dropdown.querySelector('option').textContent = 'No directory selected';
+        return;
+    }
+
+    try {
+        // Get all files in directory
+        const files = [];
+        for await (const entry of savedDirHandle.values()) {
+            if (entry.kind === 'file' && entry.name.endsWith('.cardconjurer')) {
+                files.push(entry);
+            }
+        }
+
+        // Sort files by name
+        files.sort((a, b) => a.name.localeCompare(b.name));
+
+        // Add files to dropdown
+        files.forEach(file => {
+            const option = new Option(file.name, file.name);
+            dropdown.add(option);
+        });
+
+        // Update dropdown status
+        if (files.length === 0) {
+            dropdown.querySelector('option').textContent = 'No .cardconjurer files found';
+        } else {
+            dropdown.querySelector('option').textContent = 'Select a Card to Load';
+        }
+
+    } catch (e) {
+        console.error('Error listing card files:', e);
+        dropdown.querySelector('option').textContent = 'Error listing files';
+    }
+}
+
+async function loadCardFromFile(event) {
+    const file = event.target.files[0];
+    
+    // Validate file type
+    if (!file.name.endsWith('.cardconjurer')) {
+        notify('Please select a valid .cardconjurer file', 5);
+        return;
+    }
+
+    try {
+        const reader = new FileReader();
+        
+        reader.onload = async function() {
+            try {
+                // Clear existing frames
+                document.querySelector('#frame-list').innerHTML = null;
+                
+                // Parse the card data
+                const cardData = JSON.parse(reader.result);
+                
+                // Handle both single card and array formats
+                const cardToLoad = Array.isArray(cardData) ? cardData[0].data : cardData;
+                
+                // Reset card object
+                card = {};
+                card = cardToLoad;
+                
+                if (card) {
+                    // Load values into HTML inputs
+                    document.querySelector('#info-number').value = card.infoNumber;
+                    document.querySelector('#info-rarity').value = card.infoRarity;
+                    document.querySelector('#info-set').value = card.infoSet;
+                    document.querySelector('#info-language').value = card.infoLanguage;
+                    document.querySelector('#info-note').value = card.infoNote;
+                    document.querySelector('#info-year').value = card.infoYear || date.getFullYear();
+                    artistEdited(card.infoArtist);
+                    
+                    // Load text editor values
+                    document.querySelector('#text-editor').value = card.text[Object.keys(card.text)[selectedTextIndex]].text;
+                    document.querySelector('#text-editor-font-size').value = card.text[Object.keys(card.text)[selectedTextIndex]].fontSize || 0;
+                    loadTextOptions(card.text);
+                    
+                    // Load art settings
+                    document.querySelector('#art-x').value = scaleX(card.artX) - scaleWidth(card.marginX);
+                    document.querySelector('#art-y').value = scaleY(card.artY) - scaleHeight(card.marginY);
+                    document.querySelector('#art-zoom').value = card.artZoom * 100;
+                    document.querySelector('#art-rotate').value = card.artRotate || 0;
+                    uploadArt(card.artSource);
+                    
+                    // Load set symbol settings
+                    document.querySelector('#setSymbol-x').value = scaleX(card.setSymbolX) - scaleWidth(card.marginX);
+                    document.querySelector('#setSymbol-y').value = scaleY(card.setSymbolY) - scaleHeight(card.marginY);
+                    document.querySelector('#setSymbol-zoom').value = card.setSymbolZoom * 100;
+                    uploadSetSymbol(card.setSymbolSource);
+                    
+                    // Load watermark settings
+                    document.querySelector('#watermark-x').value = scaleX(card.watermarkX) - scaleWidth(card.marginX);
+                    document.querySelector('#watermark-y').value = scaleY(card.watermarkY) - scaleHeight(card.marginY);
+                    document.querySelector('#watermark-zoom').value = card.watermarkZoom * 100;
+                    document.querySelector('#watermark-opacity').value = card.watermarkOpacity * 100;
+                    uploadWatermark(card.watermarkSource);
+                    
+                    // Load serial number settings if they exist
+                    if (card.serialNumber || card.serialTotal) {
+                        document.querySelector('#serial-number').value = card.serialNumber;
+                        document.querySelector('#serial-total').value = card.serialTotal;
+                        document.querySelector('#serial-x').value = card.serialX;
+                        document.querySelector('#serial-y').value = card.serialY;
+                        document.querySelector('#serial-scale').value = card.serialScale;
+                        serialInfoEdited();
+                    }
+                    
+                    // Load rounded corners setting
+                    document.getElementById("rounded-corners").checked = !card.noCorners;
+
+                    // Load frames
+                    card.frames.reverse();
+                    await card.frames.forEach(item => addFrame([], item));
+                    card.frames.reverse();
+                    
+                    // Load additional scripts if needed
+                    if (card.onload) {
+                        await loadScript(card.onload);
+                    }
+                    
+                    // Load mana symbols
+                    if (card.manaSymbols) {
+                        card.manaSymbols.forEach(item => loadScript(item));
+                    }
+
+                    // Resize canvases if needed
+                    let canvasesResized = false;
+                    canvasList.forEach(name => {
+                        if (window[name + 'Canvas'].width != card.width * (1 + card.marginX) || 
+                            window[name + 'Canvas'].height != card.height * (1 + card.marginY)) {
+                            sizeCanvas(name);
+                            canvasesResized = true;
+                        }
+                    });
+
+                    // Redraw everything if canvases were resized
+                    if (canvasesResized) {
+                        drawTextBuffer();
+                        drawFrames();
+                        bottomInfoEdited();
+                        watermarkEdited();
+                    }
+
+                    notify('Card loaded successfully!', 3);
+                } else {
+                    notify('Failed to load card data', 5);
+                }
+            } catch (error) {
+                console.error('Error loading card:', error);
+                notify('Error loading card: ' + error.message, 5);
+            }
+        };
+
+        reader.onerror = function() {
+            notify('Error reading file', 5);
+        };
+
+        // Start reading the file
+        reader.readAsText(file);
+        
+    } catch (error) {
+        console.error('Error handling file:', error);
+        notify('Error handling file: ' + error.message, 5);
+    }
+}
+
 async function loadCard(selectedCardKey) {
 	//clear the draggable frames
 	document.querySelector('#frame-list').innerHTML = null;
@@ -5126,54 +5356,131 @@ async function loadCard(selectedCardKey) {
 		notify(selectedCardKey + ' failed to load.', 5)
 	}
 }
-function deleteCard() {
-	var keyToDelete = document.querySelector('#load-card-options').value;
-	if (keyToDelete) {
-		var cardKeys = JSON.parse(localStorage.getItem('cardKeys'));
-		cardKeys.splice(cardKeys.indexOf(keyToDelete), 1);
-		cardKeys.sort();
-		localStorage.setItem('cardKeys', JSON.stringify(cardKeys));
-		localStorage.removeItem(keyToDelete);
-		loadAvailableCards(cardKeys);
-	}
+
+//Etsy File Picker functions
+// Function to update the UI with current directory
+function updateDirectoryUI(dirName) {
+    const currentDirSpan = document.getElementById('current-directory');
+    if (currentDirSpan) {
+        currentDirSpan.textContent = dirName ? `Current Directory: ${dirName}` : '';
+        
+        // Visual feedback animation
+        currentDirSpan.style.animation = 'none';
+        currentDirSpan.offsetHeight;
+        currentDirSpan.style.animation = 'highlight 1s ease-out';
+    }
+    
+    const baseTitle = "Spellblade Games - Card Creator";
+    document.title = dirName ? `${baseTitle} [${dirName}]` : baseTitle;
 }
-function deleteSavedCards() {
-	if (confirm('WARNING:\n\nALL of your saved cards will be deleted! If you would like to save these cards, please make sure you have downloaded them first. There is no way to undo this.\n\n(Press "OK" to delete your cards)')) {
-		var cardKeys = JSON.parse(localStorage.getItem('cardKeys'));
-		cardKeys.forEach(key => localStorage.removeItem(key));
-		localStorage.setItem('cardKeys', JSON.stringify([]));
-		loadAvailableCards([]);
-	}
+
+// Function to manage recent directories
+function updateRecentDirectories(dirName) {
+    let recentDirs = JSON.parse(localStorage.getItem('recentDirectories') || '[]');
+    recentDirs = recentDirs.filter(dir => dir !== dirName);
+    recentDirs.unshift(dirName);
+    recentDirs = recentDirs.slice(0, MAX_RECENT_DIRS);
+	// Only store directories that have valid handles
+    recentDirs = recentDirs.filter(dir => dirHandleMap.has(dir));
+    localStorage.setItem('recentDirectories', JSON.stringify(recentDirs));
+    populateDirectoryDropdown();
 }
-async function downloadSavedCards() {
-	var cardKeys = JSON.parse(localStorage.getItem('cardKeys'));
-	if (cardKeys) {
-		var allSavedCards = [];
-		cardKeys.forEach(item => {
-			allSavedCards.push({key:item, data:JSON.parse(localStorage.getItem(item))});
-		});
-		var download = document.createElement('a');
-		download.href = URL.createObjectURL(new Blob([JSON.stringify(allSavedCards)], {type:'text'}));
-		download.download = 'saved-cards.cardconjurer';
-		document.body.appendChild(download);
-		await download.click();
-		download.remove();
-	}
+
+// Function to populate the dropdown
+function populateDirectoryDropdown() {
+    const dropdown = document.getElementById('recent-directories');
+    if (!dropdown) return;
+    
+    // Get recent directories and filter for only those with valid handles
+    const recentDirs = JSON.parse(localStorage.getItem('recentDirectories') || '[]')
+        .filter(dir => dirHandleMap.has(dir));
+    
+    // Clear existing options (except the first default one)
+    while (dropdown.options.length > 1) {
+        dropdown.remove(1);
+    }
+    
+    // Add only directories with valid handles
+    recentDirs.forEach(dir => {
+        const option = new Option(dir, dir);
+        dropdown.add(option);
+    });
+
+    // Set current selection if we have a saved handle
+    if (savedDirHandle) {
+        dropdown.value = savedDirHandle.name;
+    }
+
+    // Hide/disable the dropdown if no valid directories
+    if (recentDirs.length === 0) {
+        dropdown.querySelector('option').textContent = 'No saved directories';
+    } else {
+        dropdown.querySelector('option').textContent = 'Select Previous Directory';
+    }
 }
-function uploadSavedCards(event) {
-	var reader = new FileReader();
-	reader.onload = function () {
-		JSON.parse(reader.result).forEach(item => saveCard(item));
-	}
-	reader.readAsText(event.target.files[0]);
+
+// Modified remember directory function
+async function rememberDirectory() {
+    try {
+        const dirHandle = await window.showDirectoryPicker({
+            mode: 'readwrite'
+        });
+        savedDirHandle = dirHandle;
+        
+        // Store handle in map
+        dirHandleMap.set(dirHandle.name, dirHandle);
+        
+        updateDirectoryUI(dirHandle.name);
+        updateRecentDirectories(dirHandle.name);
+
+		//Update card files list
+		await listCardFiles();
+        
+    } catch (e) {
+        console.error('Failed to set directory:', e);
+    }
 }
-//TUTORIAL TAB
-function loadTutorialVideo() {
-	var video = document.querySelector('.video > iframe');
-	if (video.src == '') {
-		video.src = 'https://www.youtube-nocookie.com/embed/e4tnOiub41g?rel=0';
-	}
+
+async function rememberDirectoryNoPopup() {
+    try {
+        const dropdown = document.getElementById('recent-directories');
+        const selectedDir = dropdown.value;
+        
+        if (!selectedDir) {
+            console.error('No directory selected in dropdown');
+            return;
+        }
+
+        if (dirHandleMap.has(selectedDir)) {
+            savedDirHandle = dirHandleMap.get(selectedDir);
+            updateDirectoryUI(selectedDir);
+            updateRecentDirectories(selectedDir);
+
+			// Update card files list
+            await listCardFiles();
+        } else {
+            console.warn('No valid handle for selected directory, requesting new permission');
+            // Fall back to picker if we don't have a valid handle
+            await rememberDirectory();
+        }
+        
+    } catch (e) {
+        console.error('Failed to set directory:', e);
+    }
 }
+
+function initializeDirectoryControls() {
+    const dropdown = document.getElementById('recent-directories');
+    if (dropdown) {
+        dropdown.addEventListener('change', async (e) => {
+            await rememberDirectoryNoPopup();
+        });
+    }
+}
+
+
+
+
 // GUIDELINES
 function drawNewGuidelines() {
 	// clear
@@ -5541,3 +5848,36 @@ bindInputs('#show-guidelines', '#show-guidelines-2', true);
 loadScript('/js/frames/groupStandard-3.js');
 loadAvailableCards();
 initDraggableArt();
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+   
+    
+    const header = document.querySelector('header');
+    if (header) {
+        header.insertAdjacentHTML('afterend', directoryControlsHTML);
+    }
+    
+    populateDirectoryDropdown();
+    initializeDirectoryControls();
+});
+
+document.getElementById('card-files-dropdown')?.addEventListener('change', async (event) => {
+    const selectedFile = event.target.value;
+    if (!selectedFile || !savedDirHandle) return;
+
+    try {
+        const fileHandle = await savedDirHandle.getFileHandle(selectedFile);
+        const file = await fileHandle.getFile();
+        const content = await file.text();
+        
+        // Parse and load the card
+        const cardData = JSON.parse(content);
+        await loadCardFromFile({ target: { files: [new File([content], selectedFile)] } });
+        
+        notify(`Loaded card: ${selectedFile}`, 3);
+    } catch (e) {
+        console.error('Error loading card:', e);
+        notify(`Error loading card: ${e.message}`, 3);
+    }
+});
