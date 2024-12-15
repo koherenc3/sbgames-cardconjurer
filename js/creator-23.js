@@ -5,6 +5,97 @@ const dirHandleMap = new Map();
 let savedDirHandle = null;
 const MAX_RECENT_DIRS = 5;
 
+const setGroups = {
+    "Standard Sets": [
+        { code: 'ltr', name: 'Lord of the Rings: Tales of Middle-earth', extension: 'png' },
+        { code: 'mom', name: 'March of the Machine', extension: 'png' },
+        { code: 'one', name: 'Phyrexia: All Will Be One', extension: 'svg' },
+        { code: 'bro', name: 'The Brothers\' War', extension: 'svg' },
+        { code: 'dmu', name: 'Dominaria United', extension: 'svg' },
+        { code: 'snc', name: 'Streets of New Capenna', extension: 'svg' },
+        { code: 'neo', name: 'Kamigawa: Neon Dynasty', extension: 'svg' },
+        { code: 'vow', name: 'Innistrad: Crimson Vow', extension: 'svg' },
+        { code: 'mid', name: 'Innistrad: Midnight Hunt', extension: 'svg' },
+        { code: 'afr', name: 'Adventures in the Forgotten Realms', extension: 'svg' },
+        { code: 'stx', name: 'Strixhaven: School of Mages', extension: 'svg' },
+        { code: 'khm', name: 'Kaldheim', extension: 'svg' }
+    ],
+    "Commander Sets": [
+        { code: 'moc', name: 'March of the Machine Commander', extension: 'png' },
+        { code: 'ncc', name: 'Streets of New Capenna Commander', extension: 'svg' },
+        { code: 'nec', name: 'Kamigawa: Neon Dynasty Commander', extension: 'svg' },
+        { code: 'voc', name: 'Crimson Vow Commander', extension: 'svg' },
+        { code: 'mic', name: 'Midnight Hunt Commander', extension: 'svg' },
+        { code: 'afc', name: 'Forgotten Realms Commander', extension: 'svg' },
+        { code: 'c21', name: 'Commander 2021', extension: 'svg' },
+        { code: 'khc', name: 'Kaldheim Commander', extension: 'svg' }
+    ],
+    "Core Sets": [
+        { code: 'm21', name: 'Core Set 2021', extension: 'svg' },
+        { code: 'm20', name: 'Core Set 2020', extension: 'svg' },
+        { code: 'm19', name: 'Core Set 2019', extension: 'svg' },
+        { code: 'm15', name: 'Magic 2015', extension: 'svg' },
+        { code: 'm14', name: 'Magic 2014', extension: 'svg' },
+        { code: 'm13', name: 'Magic 2013', extension: 'svg' },
+        { code: 'm12', name: 'Magic 2012', extension: 'svg' },
+        { code: 'm11', name: 'Magic 2011', extension: 'svg' },
+        { code: 'm10', name: 'Magic 2010', extension: 'svg' }
+    ],
+    "Masters Sets": [
+        { code: '2x2', name: 'Double Masters 2022', extension: 'svg' },
+        { code: 'mh2', name: 'Modern Horizons 2', extension: 'svg' },
+        { code: 'tsr', name: 'Time Spiral Remastered', extension: 'svg' },
+        { code: '2xm', name: 'Double Masters', extension: 'svg' },
+        { code: 'mh1', name: 'Modern Horizons', extension: 'svg' },
+        { code: 'uma', name: 'Ultimate Masters', extension: 'svg' },
+        { code: 'a25', name: 'Masters 25', extension: 'svg' },
+        { code: 'ima', name: 'Iconic Masters', extension: 'svg' },
+        { code: 'mm3', name: 'Modern Masters 2017', extension: 'svg' },
+        { code: 'ema', name: 'Eternal Masters', extension: 'svg' },
+        { code: 'mm2', name: 'Modern Masters 2015', extension: 'svg' },
+        { code: 'mm1', name: 'Modern Masters', extension: 'svg' }
+    ],
+    "Special Sets": [
+        { code: 'sld', name: 'Secret Lair Drop', extension: 'svg' },
+        { code: 'sta', name: 'Strixhaven Mystical Archive', extension: 'svg' },
+        { code: 'plist', name: 'The List', extension: 'svg' },
+        { code: 'mb1', name: 'Mystery Booster', extension: 'svg' },
+        { code: 'gn3', name: 'Game Night: Free-for-All', extension: 'svg' },
+        { code: 'gn2', name: 'Game Night 2019', extension: 'svg' },
+        { code: 'gnt', name: 'Game Night', extension: 'svg' }
+    ],
+    "Classic Expansion Sets": [
+        { code: 'ust', name: 'Unstable', extension: 'svg' },
+        { code: 'hou', name: 'Hour of Devastation', extension: 'svg' },
+        { code: 'akh', name: 'Amonkhet', extension: 'svg' },
+        { code: 'aer', name: 'Aether Revolt', extension: 'svg' },
+        { code: 'kld', name: 'Kaladesh', extension: 'svg' },
+        { code: 'emn', name: 'Eldritch Moon', extension: 'svg' },
+        { code: 'soi', name: 'Shadows over Innistrad', extension: 'svg' },
+        { code: 'ogw', name: 'Oath of the Gatewatch', extension: 'svg' },
+        { code: 'bfz', name: 'Battle for Zendikar', extension: 'svg' },
+        { code: 'ori', name: 'Magic Origins', extension: 'svg' }
+    ],
+    "Vintage Innovation Sets": [
+        { code: 'mir', name: 'Mirage', extension: 'svg' },
+        { code: 'vis', name: 'Visions', extension: 'svg' },
+        { code: 'wth', name: 'Weatherlight', extension: 'svg' },
+        { code: 'tmp', name: 'Tempest', extension: 'svg' },
+        { code: 'sth', name: 'Stronghold', extension: 'svg' },
+        { code: 'exo', name: 'Exodus', extension: 'svg' },
+        { code: 'usg', name: 'Urza\'s Saga', extension: 'svg' },
+        { code: 'ulg', name: 'Urza\'s Legacy', extension: 'svg' },
+        { code: 'uds', name: 'Urza\'s Destiny', extension: 'svg' }
+    ],
+    "Promotional Sets": [
+        { code: 'prm', name: 'Magic Online Promos', extension: 'svg' },
+        { code: 'prix', name: 'Players Rewards', extension: 'svg' },
+        { code: 'prel', name: 'Prerelease Cards', extension: 'svg' },
+        { code: 'pgpx', name: 'Grand Prix Promos', extension: 'svg' },
+        { code: 'plgm', name: 'DCI Legend Membership', extension: 'svg' }
+    ]
+};
+
 const debugging = params.get('debug') != null;
 if (debugging) {
 	alert('debugging - 4.0');
@@ -388,6 +479,9 @@ function getManaSymbol(key) {
 	return mana.get(key);
 }
 //FRAME TAB
+
+
+
 function drawFrames() {
 	frameContext.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
 	var frameToDraw = card.frames.slice().reverse();
@@ -473,30 +567,50 @@ function loadFramePacks(framePackOptions = []) {
 	loadScript("/js/frames/pack" + document.querySelector('#selectFramePack').value + ".js");
 }
 function loadFramePack(frameOptions = availableFrames) {
-	resetDoubleClick();
-	document.querySelector('#frame-picker').innerHTML = null;
-	frameOptions.forEach(item => {
-		var frameOption = document.createElement('div');
-		frameOption.classList = 'frame-option hidden';
-		frameOption.onclick = frameOptionClicked;
-		var frameOptionImage = document.createElement('img');
-		frameOption.appendChild(frameOptionImage);
-		frameOptionImage.onload = function() {
-			this.parentElement.classList.remove('hidden');
-		}
-		if (!item.noThumb && !item.src.includes('/img/black.png')) {
-			frameOptionImage.src = fixUri(item.src.replace('.png', 'Thumb.png').replace('.svg', 'Thumb.png'));
-		} else {
-			frameOptionImage.src = fixUri(item.src);
-		}
-		document.querySelector('#frame-picker').appendChild(frameOption);
+    resetDoubleClick();
+    document.querySelector('#frame-picker').innerHTML = null;
+    frameOptions.forEach(item => {
+        var frameOption = document.createElement('div');
+        frameOption.classList = 'frame-option hidden';
+        frameOption.onclick = frameOptionClicked;
+        
+        // Thumbnail image
+        var frameOptionImage = document.createElement('img');
+        frameOption.appendChild(frameOptionImage);
+        frameOptionImage.onload = function() {
+            this.parentElement.classList.remove('hidden');
+        }
+        if (!item.noThumb && !item.src.includes('/img/black.png')) {
+            frameOptionImage.src = fixUri(item.src.replace('.png', 'Thumb.png').replace('.svg', 'Thumb.png'));
+        } else {
+            frameOptionImage.src = fixUri(item.src);
+        }
 
-	})
-	document.querySelector('#mask-picker').innerHTML = '';
-	document.querySelector('#frame-picker').children[0].click();
-	if (localStorage.getItem('autoLoadFrameVersion') == 'true') {
-		document.querySelector('#loadFrameVersion').click();
-	}
+        // Add zoomed preview container
+        var zoomedPreview = document.createElement('div');
+        zoomedPreview.classList.add('zoomed-preview');
+        var zoomedImage = document.createElement('img');
+        zoomedImage.src = fixUri(item.src);
+        zoomedPreview.appendChild(zoomedImage);
+        frameOption.appendChild(zoomedPreview);
+
+        // Check if frame option is near right edge of screen
+        frameOption.addEventListener('mouseover', function(e) {
+            const rect = this.getBoundingClientRect();
+            if (rect.left > window.innerWidth - 500) {  // 500px threshold
+                zoomedPreview.classList.add('right-edge');
+            } else {
+                zoomedPreview.classList.remove('right-edge');
+            }
+        });
+
+        document.querySelector('#frame-picker').appendChild(frameOption);
+    })
+    document.querySelector('#mask-picker').innerHTML = '';
+    document.querySelector('#frame-picker').children[0].click();
+    if (localStorage.getItem('autoLoadFrameVersion') == 'true') {
+        document.querySelector('#loadFrameVersion').click();
+    }
 }
 function autoLoadFrameVersion() {
 	localStorage.setItem('autoLoadFrameVersion', document.querySelector('#autoLoadFrameVersion').checked);
@@ -3288,6 +3402,37 @@ function hslToRGB(h, s, l){
 //TEXT TAB
 var writingText;
 var autoFrameTimer;
+
+function insertSymbol(code) {
+    const textEditor = document.querySelector('#text-editor');
+    const start = textEditor.selectionStart;
+    const end = textEditor.selectionEnd;
+    const text = textEditor.value;
+    const symbolCode = `{${code}}`;
+    
+    textEditor.value = text.substring(0, start) + symbolCode + text.substring(end);
+    textEditor.selectionStart = start + symbolCode.length;
+    textEditor.selectionEnd = start + symbolCode.length;
+    textEditor.focus();
+    
+    // Trigger text edited event
+    textEdited();
+}
+
+function insertText(text) {
+    const textEditor = document.querySelector('#text-editor');
+    const start = textEditor.selectionStart;
+    const end = textEditor.selectionEnd;
+    const currentValue = textEditor.value;
+    
+    textEditor.value = currentValue.substring(0, start) + text + currentValue.substring(end);
+    textEditor.selectionStart = start + text.length;
+    textEditor.selectionEnd = start + text.length;
+    textEditor.focus();
+    
+    textEdited();
+}
+
 function loadTextOptions(textObject, replace=true) {
 	var oldCardText = card.text || {};
 	Object.entries(oldCardText).forEach(item => {
@@ -4261,6 +4406,93 @@ function artStopDrag(e) {
 	}
 }
 //SET SYMBOL TAB
+
+function getSetSymbolUrl(setCode, rarity, source) {
+    if (source === 'cardconjurer') {
+        const extension = ['moc', 'ltr', 'ltc', 'cmm', 'who', 'scd', 'woe', 'wot', 'woc', 'lci', 'lcc', 'mkm', 'mkc', 'otj', 'otc'].includes(setCode.toLowerCase()) ? 'png' : 'svg';
+        return fixUri(`/img/setSymbols/official/${setCode.toLowerCase()}-${rarity}.${extension}`);
+    } else if (source === 'gatherer') {
+        return `http://gatherer.wizards.com/Handlers/Image.ashx?type=symbol&set=${setCode}&size=large&rarity=${rarity}`;
+    } else {
+        return `https://api.hexproof.io/symbols/set/${setCode}/${rarity}`;
+    }
+}
+
+function createSetSymbolGrid(filter = '') {
+    const grid = document.getElementById('set-symbol-grid');
+    const rarity = document.querySelector('input[name="rarity"]:checked').value;
+    const source = document.getElementById('set-symbol-source-new').value;
+    
+    grid.innerHTML = '';
+    
+    Object.entries(setGroups).forEach(([groupName, sets]) => {
+        // Filter sets based on search
+        const filteredSets = sets.filter(set => 
+            set.name.toLowerCase().includes(filter.toLowerCase()) ||
+            set.code.toLowerCase().includes(filter.toLowerCase())
+        );
+        
+        // Only show group if it has matching sets
+        if (filteredSets.length > 0) {
+            // Add group header
+            const header = document.createElement('div');
+            header.className = 'set-group-header';
+            header.textContent = groupName;
+            grid.appendChild(header);
+            
+            // Add matching sets
+            filteredSets.forEach(set => {
+                const div = document.createElement('div');
+                div.className = 'set-symbol-option';
+                div.onclick = () => selectSetSymbol(set.code);
+                
+                div.innerHTML = `
+                    <img src="${getSetSymbolUrl(set.code, rarity, source)}" 
+                         alt="${set.name} set symbol"
+                         onerror="this.src='/img/blank.png'">
+                    <div class="set-name">${set.name}</div>
+                    <div class="set-code">${set.code.toUpperCase()}</div>
+                `;
+                
+                grid.appendChild(div);
+            });
+        }
+    });
+}
+
+function filterSetSymbols() {
+    const searchInput = document.getElementById('set-symbol-search');
+    createSetSymbolGrid(searchInput.value);
+}
+
+function selectSetSymbol(setCode) {
+    // Update visual selection
+    document.querySelectorAll('.set-symbol-option').forEach(option => {
+        option.classList.remove('selected');
+        if (option.querySelector('.set-code').textContent === setCode.toUpperCase()) {
+            option.classList.add('selected');
+        }
+    });
+
+    // Update the original set code input and trigger the symbol update
+    document.getElementById('set-symbol-code').value = setCode;
+    document.getElementById('set-symbol-rarity').value = document.querySelector('input[name="rarity"]:checked').value;
+    fetchSetSymbol();
+}
+
+function updateSetSymbol() {
+    createSetSymbolGrid(document.getElementById('set-symbol-search').value);
+    const setCode = document.getElementById('set-symbol-code').value;
+    if (setCode) {
+        // Update the original rarity dropdown to match the radio button selection
+        document.getElementById('set-symbol-rarity').value = document.querySelector('input[name="rarity"]:checked').value;
+        // Refetch the set symbol with the new rarity
+        fetchSetSymbol();
+        // Reselect the set in the grid to maintain visual selection
+        selectSetSymbol(setCode);
+    }
+}
+
 function uploadSetSymbol(imageSource, otherParams) {
 	setSymbol.src = imageSource;
 	if (otherParams && otherParams == 'resetSetSymbol') {
@@ -5357,6 +5589,74 @@ async function loadCard(selectedCardKey) {
 	}
 }
 
+function resetCard() {
+    // Reset the card object to its default values
+    card = {
+        width: getStandardWidth(),
+        height: getStandardHeight(),
+        marginX: 0,
+        marginY: 0,
+        frames: [],
+        artSource: fixUri('/img/blank.png'),
+        artX: 0,
+        artY: 0,
+        artZoom: 1,
+        artRotate: 0,
+        setSymbolSource: fixUri('/img/blank.png'),
+        setSymbolX: 0,
+        setSymbolY: 0,
+        setSymbolZoom: 1,
+        watermarkSource: fixUri('/img/blank.png'),
+        watermarkX: 0,
+        watermarkY: 0,
+        watermarkZoom: 1,
+        watermarkLeft: 'none',
+        watermarkRight: 'none',
+        watermarkOpacity: 0.4,
+        version: '',
+        manaSymbols: []
+    };
+
+    // Reset the input fields and other UI elements to their default values
+    document.querySelector('#info-number').value = '';
+    document.querySelector('#info-rarity').value = '';
+    document.querySelector('#info-set').value = '';
+    document.querySelector('#info-language').value = '';
+    document.querySelector('#info-artist').value = '';
+    document.querySelector('#info-year').value = '';
+    document.querySelector('#info-note').value = '';
+
+    // Reset the text editor
+    document.querySelector('#text-editor').value = '';
+    document.querySelector('#text-editor-font-size').value = 0;
+    
+    // Reset the art settings
+    document.querySelector('#art-x').value = 0;
+    document.querySelector('#art-y').value = 0;
+    document.querySelector('#art-zoom').value = 100;
+    document.querySelector('#art-rotate').value = 0;
+    uploadArt(blank.src);
+
+    // Reset the set symbol settings
+    document.querySelector('#setSymbol-x').value = 0;
+    document.querySelector('#setSymbol-y').value = 0;
+    document.querySelector('#setSymbol-zoom').value = 100;
+    uploadSetSymbol(blank.src);
+
+    // Reset the watermark settings
+    document.querySelector('#watermark-x').value = 0;
+    document.querySelector('#watermark-y').value = 0;
+    document.querySelector('#watermark-zoom').value = 100;
+    document.querySelector('#watermark-opacity').value = 40;
+    uploadWatermark(blank.src);
+
+    // Reset the frame list
+    document.querySelector('#frame-list').innerHTML = '';
+
+    // Redraw the card
+    drawCard();
+}
+
 //Etsy File Picker functions
 // Function to update the UI with current directory
 function updateDirectoryUI(dirName) {
@@ -5372,8 +5672,9 @@ function updateDirectoryUI(dirName) {
     
     const baseTitle = "Spellblade Games - Card Creator";
     document.title = dirName ? `${baseTitle} [${dirName}]` : baseTitle;
-}
 
+	
+}
 // Function to manage recent directories
 function updateRecentDirectories(dirName) {
     let recentDirs = JSON.parse(localStorage.getItem('recentDirectories') || '[]');
@@ -5769,6 +6070,16 @@ function toggleHighRes() {
 	drawCard();
 }
 
+
+//START TEST STUFF
+
+
+
+// END TEST STUFF
+
+
+
+
 // INITIALIZATION
 
 // auto load frame version (user defaults)
@@ -5846,8 +6157,7 @@ bindInputs('#show-guidelines', '#show-guidelines-2', true);
 
 // Load / init whatever
 loadScript('/js/frames/groupStandard-3.js');
-loadAvailableCards();
-initDraggableArt();
+
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -5855,11 +6165,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const header = document.querySelector('header');
     if (header) {
-        header.insertAdjacentHTML('afterend', directoryControlsHTML);
+        //header.insertAdjacentHTML('afterend', directoryControlsHTML);
     }
-    
+	
+	initializeDirectoryControls();
+    //loadAvailableCards();
+	initDraggableArt();
     populateDirectoryDropdown();
-    initializeDirectoryControls();
+	//createSetSymbolGrid();
+    
 });
 
 document.getElementById('card-files-dropdown')?.addEventListener('change', async (event) => {
@@ -5881,3 +6195,5 @@ document.getElementById('card-files-dropdown')?.addEventListener('change', async
         notify(`Error loading card: ${e.message}`, 3);
     }
 });
+
+

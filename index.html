@@ -37,14 +37,14 @@
 
 	<div id="content">		
 		<!-- START OF CONTENT -->
-	<link rel="preload" href="/fonts/beleren-b.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
-	<link rel="preload" href="/fonts/beleren-bsc.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
-	<link rel="preload" href="/fonts/gotham-medium.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
-	<link rel="preload" href="/fonts/goudy-medieval.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
-	<link rel="preload" href="/fonts/matrix.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
-	<link rel="preload" href="/fonts/matrix-b.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
-	<link rel="preload" href="/fonts/mplantin.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
-	<link rel="preload" href="/fonts/mplantin-i.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
+	<link rel="prefetch" href="/fonts/beleren-b.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
+	<link rel="prefetch" href="/fonts/beleren-bsc.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
+	<link rel="prefetch" href="/fonts/gotham-medium.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
+	<link rel="prefetch" href="/fonts/goudy-medieval.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
+	<link rel="prefetch" href="/fonts/matrix.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
+	<link rel="prefetch" href="/fonts/matrix-b.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
+	<link rel="prefetch" href="/fonts/mplantin.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
+	<link rel="prefetch" href="/fonts/mplantin-i.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
 	<div class='main-content'>
 		<!-- Popups -->
 		<div id='frame-element-editor' class='frame-element-editor'>
@@ -247,15 +247,94 @@
 						<div class='readable-background padding margin-bottom'>
 							<h5 class='margin-bottom padding input-description'>Enter card text</h5>
 							<textarea id='text-editor' class='input margin-bottom' oninput='textEdited();'></textarea>
+							<div class='readable-background padding margin-bottom'>
+								<h5 class='padding input-description margin-bottom'>Quick Insert Mana Symbols</h5>
+								<div class='input-grid mana-symbol-grid'>
+									<!-- Basic Mana -->
+									<button class='input mana-symbol-button' onclick="insertSymbol('W')" title="White Mana">
+										<img src="/img/manaSymbols/w.svg" alt="W" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('U')" title="Blue Mana">
+										<img src="/img/manaSymbols/u.svg" alt="U" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('B')" title="Black Mana">
+										<img src="/img/manaSymbols/b.svg" alt="B" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('R')" title="Red Mana">
+										<img src="/img/manaSymbols/r.svg" alt="R" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('G')" title="Green Mana">
+										<img src="/img/manaSymbols/g.svg" alt="G" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('C')" title="Colorless Mana">
+										<img src="/img/manaSymbols/c.svg" alt="C" style="width: 25px; height: 25px;">
+									</button>
+									
+									<!-- Numbers -->
+									<button class='input mana-symbol-button' onclick="insertSymbol('0')" title="Zero Mana">
+										<img src="/img/manaSymbols/0.svg" alt="0" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('1')" title="One Mana">
+										<img src="/img/manaSymbols/1.svg" alt="1" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('2')" title="Two Mana">
+										<img src="/img/manaSymbols/2.svg" alt="2" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('X')" title="X Mana">
+										<img src="/img/manaSymbols/x.svg" alt="X" style="width: 25px; height: 25px;">
+									</button>
+									
+									<!-- Special Symbols -->
+									<button class='input mana-symbol-button' onclick="insertSymbol('T')" title="Tap Symbol">
+										<img src="/img/manaSymbols/t.svg" alt="T" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('untap')" title="Untap Symbol">
+										<img src="/img/manaSymbols/untap.svg" alt="Q" style="width: 25px; height: 25px;">
+									</button>
+									
+									<!-- Hybrid Mana -->
+									<button class='input mana-symbol-button' onclick="insertSymbol('WU')" title="White/Blue Mana">
+										<img src="/img/manaSymbols/wu.svg" alt="WU" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('WB')" title="White/Black Mana">
+										<img src="/img/manaSymbols/wb.svg" alt="WB" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('UB')" title="Blue/Black Mana">
+										<img src="/img/manaSymbols/ub.svg" alt="UB" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('UR')" title="Blue/Red Mana">
+										<img src="/img/manaSymbols/ur.svg" alt="UR" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('BR')" title="Black/Red Mana">
+										<img src="/img/manaSymbols/br.svg" alt="BR" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('BG')" title="Black/Green Mana">
+										<img src="/img/manaSymbols/bg.svg" alt="BG" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('RG')" title="Red/Green Mana">
+										<img src="/img/manaSymbols/rg.svg" alt="RG" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('RW')" title="Red/White Mana">
+										<img src="/img/manaSymbols/rw.svg" alt="RW" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('GW')" title="Green/White Mana">
+										<img src="/img/manaSymbols/gw.svg" alt="GW" style="width: 25px; height: 25px;">
+									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('GU')" title="Green/Blue Mana">
+										<img src="/img/manaSymbols/gu.svg" alt="GU" style="width: 25px; height: 25px;">
+									</button>
+								</div>
+							</div>
 							<div class='padding input-grid'>
+
+							<input id="text-editor-font-size" class="input" type="number" placeholder="Adjust Font Fize" value="0" step="1" oninput="fontSizedEdited();">
 								<button class='input' onclick="toggleTextTag('i');">Italic</button>
 								<button class='input' onclick="toggleTextTag('bold');">Bold</button>
+								<button class='input' onclick="insertText('∞');">∞</button>
 							</div>
 							<h5 class='margin-bottom padding input-description'>Edit the placement and size of the selected textbox</h5>
 							<button class='input' onclick='textboxEditor();'>Edit Bounds</button>
-							<h5 class='margin-bottom padding input-description'>Adjust font size</h5>
-							<input id="text-editor-font-size" class="input" type="number" placeholder="0" value="0" step="1" oninput="fontSizedEdited();">
-						</div>
+							</div>
 						<div class='readable-background padding margin-bottom'>
 							<h5 class='collapsible collapsed padding input-description' onclick='toggleCollapse(event);'>
 								Text Code / Mana Symbol Code Reference
@@ -392,15 +471,7 @@
 					<div id='creator-menu-setSymbol' class='hidden'>
 						<div class='readable-background padding margin-bottom'>
 							<h5 class='margin-bottom padding input-description'>Choose/upload your set symbol</h5>
-							<div class='input-grid margin-bottom'>
-								<div class='padding drop-area'>
-						            <h5 class='margin-bottom padding input-description'>Drag and drop</h5>
-						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadSetSymbol, "resetSetSymbol");' data-dropFunction='uploadSetSymbol' data-otherParams='resetSetSymbol'>
-						        </div>
-						        <div>
-									<input type='url' placeholder='Via URL' class='input' onchange='imageURL(this.value, uploadSetSymbol, "resetSetSymbol");'>
-								</div>
-							</div>
+							
 							<h5 class='margin-bottom padding input-description'>Or enter a set code/rarity</h5>
 							<div class='input-grid margin-bottom'>
 								<input id='set-symbol-code' type='text' placeholder='Set Code' class='input' onchange='fetchSetSymbol();'>
@@ -424,6 +495,7 @@
 								<p class='padding'>For watermarks, please reference <a class='underline' href='https://keyrune.andrewgioia.com/icons.html' target='_blank'>Keyrune</a>.</p>
 							</div>
 						</div>
+						
 						<div class='readable-background padding margin-bottom'>
 							<h5 class='margin-bottom padding input-description'>Position/scale your Set Symbol (X, Y, Scale)</h5>
 							<div class='input-grid margin-bottom'>
