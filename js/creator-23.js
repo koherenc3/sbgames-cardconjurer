@@ -111,7 +111,12 @@ function fixUri(input) {
 	} else {
 		return prefix + input; //input.replace('/img/frames', prefix + '/img/frames');
 	} */
-	return input;
+
+		if (input.includes('api.hexproof.io')) {
+			return 'https://corsproxy.io/?' + encodeURIComponent(input);
+		}
+		return input;
+	
 }
 function setImageUrl(image, source) {
 	image.crossOrigin = 'anonymous';
@@ -259,6 +264,37 @@ async function setBottomInfoStyle() {
 			});
 		}
 }
+//Loads up a new card 
+function newCard() {
+    // Clear frames
+    card.frames = [];
+    document.querySelector('#frame-list').innerHTML = null;
+
+    // Reset art
+    art.src = fixUri('/img/blank.png');
+    document.querySelector('#art-x').value = 0;
+    document.querySelector('#art-y').value = 0;
+    document.querySelector('#art-zoom').value = 100;
+    document.querySelector('#art-rotate').value = 0;
+    document.querySelector('#art-artist').value = '';
+    
+    // Clear all text fields while preserving their positions/structure
+    if (card.text) {
+        Object.keys(card.text).forEach(key => {
+            card.text[key].text = '';
+        });
+        document.querySelector('#text-editor').value = '';
+        document.querySelector('#text-editor-font-size').value = 0;
+    }
+
+    // Redraw everything
+    drawTextBuffer();
+    drawFrames();
+    drawCard();
+
+    notify('Created new card', 3);
+}
+
 //Canvas management
 function sizeCanvas(name, width = Math.round(card.width * (1 + 2 * card.marginX)), height = Math.round(card.height * (1 + 2 * card.marginY))) {
 	if (!window[name + 'Canvas']) {
@@ -594,14 +630,17 @@ function loadFramePack(frameOptions = availableFrames) {
         zoomedPreview.appendChild(zoomedImage);
         frameOption.appendChild(zoomedPreview);
 
-        // Check if frame option is near right edge of screen
-        frameOption.addEventListener('mouseover', function(e) {
-            const rect = this.getBoundingClientRect();
-            if (rect.left > window.innerWidth - 500) {  // 500px threshold
-                zoomedPreview.classList.add('right-edge');
-            } else {
-                zoomedPreview.classList.remove('right-edge');
-            }
+        // Add mouseover handler for fixed positioning
+        frameOption.addEventListener('mouseenter', (e) => {
+            const framePicker = document.querySelector('#frame-picker');
+            const framePickerRect = framePicker.getBoundingClientRect();
+            
+            // Position preview to the left of the frame picker
+            const previewX = framePickerRect.left - 1000; // 300px width + 20px spacing
+            const previewY = framePickerRect.top - 200;
+            
+            zoomedPreview.style.left = `${previewX}px`;
+            zoomedPreview.style.top = `${previewY}px`;
         });
 
         document.querySelector('#frame-picker').appendChild(frameOption);
@@ -4405,94 +4444,9 @@ function artStopDrag(e) {
 		draggingArt = false;
 	}
 }
+
+
 //SET SYMBOL TAB
-
-function getSetSymbolUrl(setCode, rarity, source) {
-    if (source === 'cardconjurer') {
-        const extension = ['moc', 'ltr', 'ltc', 'cmm', 'who', 'scd', 'woe', 'wot', 'woc', 'lci', 'lcc', 'mkm', 'mkc', 'otj', 'otc'].includes(setCode.toLowerCase()) ? 'png' : 'svg';
-        return fixUri(`/img/setSymbols/official/${setCode.toLowerCase()}-${rarity}.${extension}`);
-    } else if (source === 'gatherer') {
-        return `http://gatherer.wizards.com/Handlers/Image.ashx?type=symbol&set=${setCode}&size=large&rarity=${rarity}`;
-    } else {
-        return `https://api.hexproof.io/symbols/set/${setCode}/${rarity}`;
-    }
-}
-
-function createSetSymbolGrid(filter = '') {
-    const grid = document.getElementById('set-symbol-grid');
-    const rarity = document.querySelector('input[name="rarity"]:checked').value;
-    const source = document.getElementById('set-symbol-source-new').value;
-    
-    grid.innerHTML = '';
-    
-    Object.entries(setGroups).forEach(([groupName, sets]) => {
-        // Filter sets based on search
-        const filteredSets = sets.filter(set => 
-            set.name.toLowerCase().includes(filter.toLowerCase()) ||
-            set.code.toLowerCase().includes(filter.toLowerCase())
-        );
-        
-        // Only show group if it has matching sets
-        if (filteredSets.length > 0) {
-            // Add group header
-            const header = document.createElement('div');
-            header.className = 'set-group-header';
-            header.textContent = groupName;
-            grid.appendChild(header);
-            
-            // Add matching sets
-            filteredSets.forEach(set => {
-                const div = document.createElement('div');
-                div.className = 'set-symbol-option';
-                div.onclick = () => selectSetSymbol(set.code);
-                
-                div.innerHTML = `
-                    <img src="${getSetSymbolUrl(set.code, rarity, source)}" 
-                         alt="${set.name} set symbol"
-                         onerror="this.src='/img/blank.png'">
-                    <div class="set-name">${set.name}</div>
-                    <div class="set-code">${set.code.toUpperCase()}</div>
-                `;
-                
-                grid.appendChild(div);
-            });
-        }
-    });
-}
-
-function filterSetSymbols() {
-    const searchInput = document.getElementById('set-symbol-search');
-    createSetSymbolGrid(searchInput.value);
-}
-
-function selectSetSymbol(setCode) {
-    // Update visual selection
-    document.querySelectorAll('.set-symbol-option').forEach(option => {
-        option.classList.remove('selected');
-        if (option.querySelector('.set-code').textContent === setCode.toUpperCase()) {
-            option.classList.add('selected');
-        }
-    });
-
-    // Update the original set code input and trigger the symbol update
-    document.getElementById('set-symbol-code').value = setCode;
-    document.getElementById('set-symbol-rarity').value = document.querySelector('input[name="rarity"]:checked').value;
-    fetchSetSymbol();
-}
-
-function updateSetSymbol() {
-    createSetSymbolGrid(document.getElementById('set-symbol-search').value);
-    const setCode = document.getElementById('set-symbol-code').value;
-    if (setCode) {
-        // Update the original rarity dropdown to match the radio button selection
-        document.getElementById('set-symbol-rarity').value = document.querySelector('input[name="rarity"]:checked').value;
-        // Refetch the set symbol with the new rarity
-        fetchSetSymbol();
-        // Reselect the set in the grid to maintain visual selection
-        selectSetSymbol(setCode);
-    }
-}
-
 function uploadSetSymbol(imageSource, otherParams) {
 	setSymbol.src = imageSource;
 	if (otherParams && otherParams == 'resetSetSymbol') {
@@ -4553,7 +4507,11 @@ function fetchSetSymbol() {
 		uploadSetSymbol('http://gatherer.wizards.com/Handlers/Image.ashx?type=symbol&set=' + setCode + '&size=large&rarity=' + setRarity, 'resetSetSymbol');
 	} else if (document.querySelector("#set-symbol-source").value == 'hexproof') {
 		if (setSymbolAliases.has(setCode.toLowerCase())) setCode = setSymbolAliases.get(setCode.toLowerCase());
-		uploadSetSymbol('https://api.hexproof.io/symbols/set/' + setCode + '/' + setRarity, 'resetSetSymbol');
+		const hexproofUrl = `https://api.hexproof.io/symbols/set/${setCode}/${setRarity}`;
+		const corsProxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(hexproofUrl)}`;
+		//uploadSetSymbol('https://api.hexproof.io/symbols/set/' + setCode + '/' + setRarity, 'resetSetSymbol');
+		uploadSetSymbol(corsProxyUrl, 'resetSetSymbol');
+
 	} else {
 		var extension = 'svg';
 		if (['moc', 'ltr', 'ltc', 'cmm', 'who', 'scd', 'woe', 'wot', 'woc', 'lci', 'lcc', 'mkm', 'mkc', 'otj', 'otc'].includes(setCode.toLowerCase())) {
@@ -5426,10 +5384,12 @@ async function loadCardFromFile(event) {
                     document.querySelector('#info-year').value = card.infoYear || date.getFullYear();
                     artistEdited(card.infoArtist);
                     
-                    // Load text editor values
-                    document.querySelector('#text-editor').value = card.text[Object.keys(card.text)[selectedTextIndex]].text;
-                    document.querySelector('#text-editor-font-size').value = card.text[Object.keys(card.text)[selectedTextIndex]].fontSize || 0;
-                    loadTextOptions(card.text);
+                    // Load text editor values and force font rendering
+                	document.querySelector('#text-editor').value = card.text[Object.keys(card.text)[selectedTextIndex]].text;
+                	document.querySelector('#text-editor-font-size').value = card.text[Object.keys(card.text)[selectedTextIndex]].fontSize || 0;
+                	await loadTextOptions(card.text); // Make sure this completes
+                	textEdited();
+                	await drawText(); // Force immediate text rendering
                     
                     // Load art settings
                     document.querySelector('#art-x').value = scaleX(card.artX) - scaleWidth(card.marginX);
@@ -5489,13 +5449,20 @@ async function loadCardFromFile(event) {
                         }
                     });
 
-                    // Redraw everything if canvases were resized
+					// Final redraw sequence
+					await drawText(); // Draw text first
+					await new Promise(resolve => setTimeout(resolve, 50)); // Small delay
+					drawFrames();
+					bottomInfoEdited();
+					watermarkEdited();
+
+                    /* Redraw everything if canvases were resized
                     if (canvasesResized) {
                         drawTextBuffer();
                         drawFrames();
                         bottomInfoEdited();
                         watermarkEdited();
-                    }
+                    }*/
 
                     notify('Card loaded successfully!', 3);
                 } else {
@@ -5662,7 +5629,7 @@ function resetCard() {
 function updateDirectoryUI(dirName) {
     const currentDirSpan = document.getElementById('current-directory');
     if (currentDirSpan) {
-        currentDirSpan.textContent = dirName ? `Current Directory: ${dirName}` : '';
+        currentDirSpan.textContent = dirName ? `${dirName}` : '';
         
         // Visual feedback animation
         currentDirSpan.style.animation = 'none';

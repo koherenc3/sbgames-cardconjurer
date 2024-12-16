@@ -1,0 +1,1 @@
+1. loadCardFromFile() does not load the frame version. 

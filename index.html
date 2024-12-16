@@ -21,18 +21,48 @@
 </head>
 <body>
 	<div class='background'></div>
-	<header class='readable-background'>
-		<h1 class='title center'>Spellblade Games - Card Creator</h1>
-		<div class="directory-controls" style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
-			<button onclick="rememberDirectory()" class="directory-button">Set New Directory</button>
-			<select onchange="rememberDirectoryNoPopup()"id="recent-directories" class="directory-dropdown">
-				<option value="" disabled selected>Select Previous Directory</option>
-			</select>
+	
+		<header class='readable-background'>
+			<h1 class='title center'>Spellblade Games - Card Creator</h1>
+			<div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">
+				<div class="directory-controls" style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
+					<button onclick="rememberDirectory()" class="input">Set New Directory</button>
+					<select onchange="rememberDirectoryNoPopup()" id="recent-directories" class="input">
+						<option value="" disabled selected>Select Previous Directory</option>
+					</select>
+					
+					
+				</div>
+				
+				<div class="directory-content" style="margin-top: 1rem;">
+					<div class="card-files-section">
+						<h4>Available Cards in Directory: <span id="current-directory" class="directory-label"></span></h4>
+						<select id="card-files-dropdown" class="input">
+							<option value="" disabled selected>Select a Card to Load</option>
+						</select>
+					</div>
 			
-			<span id="current-directory" class="directory-label"></span>
-		</div>
-		
-	</header>
+					<div class="action-buttons" style="display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: center;">
+						<button onclick='if (confirm("Are you sure you want to create a new card? Any unsaved changes will be lost.")) newCard();' 
+								class="input" 
+								title="Creates a new card. This will empty out the details on your current card!">
+							New Card
+						</button>
+						<button onclick="saveCard()" 
+								class="input"
+								title="Saves a .cardconjurer files in the current directory.">
+							Save Card
+						</button>
+						<button onclick="downloadCard()" 
+								class="input"
+								title="Downloads a .png file of the card.">
+							Download Card
+						</button>
+					</div>
+				</div>
+			</div>
+		</header>
+	
 	
 
 	<div id="content">		
@@ -135,15 +165,16 @@
 			<canvas class='creator-canvas box-shadow' id='previewCanvas' width='1005' height='1407'></canvas>
 			<div class='creator-menu box-shadow'>
 				<div id='creator-menu-tabs' class='creator-menu-tabs'>
-					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "import")'>Save/Load</h3>
+					
 					<h3 class='selectable readable-background selected' onclick='toggleCreatorTabs(event, "frame")'>Frame</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "text")'>Text</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "art")'>Art</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "setSymbol")'>Set Symbol</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "watermark")'>Watermark</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "bottomInfo")'>Collector</h3>
+					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "import")'>Save/Load</h3>
 					
-					<h3 class='selectable readable-background' onclick='downloadCard()'>Download</h3>
+				
 				</div>
 				<div id='creator-menu-sections' class='margin-bottom'>
 					<div id='creator-menu-frame'>
@@ -176,32 +207,28 @@
 								<div class="autocomplete"><input id='frameSearch' onchange="frameSearch(this.value)" type='text' class='input' placeholder='Search Frames...'></div>
 							</div>
 							<div class='input-grid margin-bottom'>
-								<button id='loadFrameVersion' class='input'>Load Frame Version</button>
+								<button id='loadFrameVersion' class='input'>Load Current Frame Version</button>
+								<label class='checkbox-container input'>Auto Load Frames?
+									<input id='autoLoadFrameVersion' type='checkbox' onchange='autoLoadFrameVersion();' checked>
+									<span class='checkmark'></span>
+								</label>
 							</div>
-							<h5 class='input-description margin-bottom'>Automatically load Frame Version when loading Frame Packs</h5>
-							<label class='checkbox-container input'>Auto load
-								<input id='autoLoadFrameVersion' type='checkbox' onchange='autoLoadFrameVersion();' checked>
-								<span class='checkmark'></span>
-							</label>
+							
 						</div>
 						<div class='readable-background margin-bottom padding'>
 							<h5 class='margin-bottom padding input-description'>Select a Frame Image and a Mask, then add it to your card</h5>
+							<div class='input-grid margin-bottom'>
+								<button id='addToFull' class='input' onclick='addFrame()'>Add Frame to Card</button>
+								<button id='addToRightHalf' class='input' onclick='addFrame([{src:"/img/frames/maskRightHalf.png", name:"Right Half"}])'>Add to Right Half</button>
+								<button id='addToMiddleThird' class='input' onclick='addFrame([{src:"/img/frames/maskMiddleThird.png", name:"Middle Third"}])'>Add to Middle Third</button>					
+								<button id='addToLeftHalf' class='input' onclick='addFrame([{src:"/img/frames/maskLeftHalf.png", name:"Left Half"}])'>Add to Left Half</button>
+							</div>
 							<div class='split-grid margin-bottom'>
 								<div id='frame-picker' class='frame-picker'></div>
 								<div id='mask-picker' class='mask-picker'></div>
 							</div>
-							<div class='input-grid margin-bottom'>
-								<button id='addToFull' class='input' onclick='addFrame()'>Add Frame to Card</button>
-								<button id='addToRightHalf' class='input' onclick='addFrame([{src:"/img/frames/maskRightHalf.png", name:"Right Half"}])'>Add Frame to Card (Right Half)</button>
-							</div>
-							<h5 class='collapsible collapsed padding input-description' onclick='toggleCollapse(event);'>More options</h5>
-								<div>
-									<div class='input-grid margin-bottom'>
-										<button id='addToLeftHalf' class='input' onclick='addFrame([{src:"/img/frames/maskLeftHalf.png", name:"Left Half"}])'>Add Frame to Card (Left Half)</button>
-										<button id='addToMiddleThird' class='input' onclick='addFrame([{src:"/img/frames/maskMiddleThird.png", name:"Middle Third"}])'>Add Frame to Card (Middle Third)</button>
-									</div>
-									<h5 class='padding input-description'>You can now double click frames and masks to add them to the card. You can do so while holding the shift, control, or alt keys to add to the right half, left half, or middle third, respectively.</h5>
-								</div>
+							
+							
 							<h5 id='selectedPreview' class='padding input-description'>(Selected: White Frame, No Mask)</h5>
 						</div>
 						<div class='readable-background padding margin-bottom'>
@@ -749,20 +776,11 @@
 					<div id='creator-menu-import' class='hidden'>
 						<div class='readable-background margin-bottom padding'>
 							<div class='readable-background margin-bottom padding'>
-								<h3 class='padding margin-bottom input-description'><u>Save the current card</u></h3>
-								<h5 class='padding margin-bottom input-description'>A .cardconjurer file will save to the folder that is select above! Make sure you have the correct folder selected!</h5>
-								<button class='input margin-bottom' onclick='saveCard();'>Save Card</button>
 								<h3 class='padding margin-bottom input-description'><u>Load a saved card</u></h3>
 								
 									<h5 class='margin-bottom padding input-description'>Drag and drop .cardconjurer file</h5>
 									<input type='file' accept='.cardconjurer' placeholder='Raw Card File Upload' class='input' onchange='loadCardFromFile(event)'>
 								
-								<div class="card-files-section">
-									<h4>Available Cards to Load in Folder</h4>
-									<select id="card-files-dropdown" class="card-files-dropdown" onselect="loadCardFromFile(event)">
-										<option value="" disabled selected>Select a Card to Load</option>
-									</select>
-								</div>
 							</div>
 							<h3 class='padding margin-bottom input-description'><u>Import a real card by name</u></h3>
 							<input id='import-name' class='input margin-bottom' type='text' onchange='importChanged();' placeholder='Enter Card Name'>
