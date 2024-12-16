@@ -877,13 +877,14 @@ textarea.input {
 	border: 0.5rem solid #333;
 	border-radius: 1rem;
 	box-shadow: 0.5rem 0.5rem 1rem 0.5rem black;
-	z-index: 10;
+	z-index: 10000;
 	padding: 2rem;
 	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 	grid-gap: 1rem;
 }
 .frame-element-editor.opened, .textbox-editor.opened {
 	display: grid;
+	z-index: 10000;
 }
 .frame-element-editor > .frame-element-editor-title, .textbox-editor > .textbox-editor-title {
 	grid-column: 1 / -2;
@@ -1026,7 +1027,7 @@ textarea.input {
 
 /* Ensure other elements don't overlap */
 .creator-menu, .frame-element-editor, .textbox-editor {
-    z-index: 999; /* Lower than zoomed preview */
+    z-index: 1; /* Lower than zoomed preview */
 }
 
 /* Optional: Add smooth transition */
