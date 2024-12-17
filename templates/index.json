@@ -1,0 +1,10 @@
+{
+    "Together Forever - Regular Frame": {
+        "path": "/templates/Together Forever.cardconjurer",
+        "description": "Basic Card using Together Forever"
+    },
+    "Together Forever - Full Art": {
+        "path": "/templates/Together Forever - Full Art.cardconjurer",
+        "description": "Full Art Borderless version of Together Forever"
+    }
+}

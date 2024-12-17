@@ -3526,8 +3526,21 @@ function textEdited() {
 	
 }
 function fontSizedEdited() {
-	card.text[Object.keys(card.text)[selectedTextIndex]].fontSize = document.querySelector('#text-editor-font-size').value;
-	drawTextBuffer();
+	const textKey = Object.keys(card.text)[selectedTextIndex];
+    const newFontSize = document.querySelector('#text-editor-font-size').value;
+    console.log('Changing font size for:', textKey);
+    console.log('New font size:', newFontSize);
+    console.log('Before change:', card.text[textKey].fontSize);
+	console.log('Text object before:', card.text[textKey]);
+    
+    card.text[textKey].fontSize = newFontSize;
+    console.log('Text object after:', card.text[textKey]);
+	console.log('Starting text size calculation:', 
+        (scaleHeight(card.text[textKey].size) || scaleHeight(0.038)) + 
+        parseInt(card.text[textKey].fontSize || '0')
+    );
+    console.log('After change:', card.text[textKey].fontSize);
+    drawTextBuffer();
 }
 function drawTextBuffer() {
 	clearTimeout(writingText);
@@ -3561,7 +3574,11 @@ function writeText(textObject, targetContext) {
 	var textY = scaleY(textObject.y) || scaleY(0);
 	var textWidth = scaleWidth(textObject.width) || scaleWidth(1);
 	var textHeight = scaleHeight(textObject.height) || scaleHeight(1);
-	var startingTextSize = scaleHeight(textObject.size) || scaleHeight(0.038);
+	//var startingTextSize = scaleHeight(textObject.size) || scaleHeight(0.038);
+	/* Fix: Font Size on Rules Text bug */
+	var startingTextSize = (scaleHeight(textObject.size) || scaleHeight(0.038)) + parseInt(textObject.fontSize || '0');
+
+
 	var textFontHeightRatio = 0.7;
 	var textBounded = textObject.bounded || true;
 	var textOneLine = textObject.oneLine || false;
@@ -3712,7 +3729,7 @@ function writeText(textObject, targetContext) {
 		// if (textFont == 'goudymedieval') {
 		// 	lineCanvas.style.letterSpacing = '3.5px';
 		// }
-		textSize += parseInt(textObject.fontSize || '0');
+		//textSize += parseInt(textObject.fontSize || '0');
 		lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
 		lineContext.fillStyle = textColor;
 		lineContext.shadowColor = textShadowColor;
@@ -4887,6 +4904,71 @@ function downloadCard(alt = false, jpeg = false) {
 }
 
 //IMPORT/SAVE TAB
+async function loadTemplatesList() {
+    const templatesList = document.querySelector('#templates-list');
+    
+    try {
+        // Fetch the list of templates from a JSON file in the templates directory
+        const response = await fetch('/templates/index.json');
+        if (!response.ok) {
+            throw new Error('Failed to load templates list');
+        }
+        
+        const templates = await response.json();
+        templatesList.innerHTML = '';
+
+        if (Object.keys(templates).length === 0) {
+            const option = document.createElement('option');
+            option.disabled = true;
+            option.selected = true;
+            option.textContent = 'No templates available';
+            templatesList.appendChild(option);
+        } else {
+            // Add each template as an option
+            Object.keys(templates).sort().forEach(templateName => {
+                const option = document.createElement('option');
+                option.value = templates[templateName].path; // Store the full path
+                option.textContent = templateName;
+                templatesList.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading templates:', error);
+        templatesList.innerHTML = '<option disabled selected>Error loading templates</option>';
+    }
+}
+
+async function loadSelectedTemplate() {
+    const templatesList = document.querySelector('#templates-list');
+    const selectedTemplatePath = templatesList.value;
+    
+    if (!selectedTemplatePath) {
+        notify('Please select a template to load', 5);
+        return;
+    }
+
+    try {
+        // Fetch the template file
+        const response = await fetch(selectedTemplatePath);
+        if (!response.ok) {
+            throw new Error('Failed to load template');
+        }
+        
+        const templateData = await response.text();
+        
+        // Create a File-like object from the template data
+        const blob = new Blob([templateData], { type: 'application/json' });
+        const file = new File([blob], 'template.cardconjurer', { type: 'application/json' });
+        
+        // Load the template using the existing loadCardFromFile function
+        loadCardFromFile({ target: { files: [file] } });
+    } catch (error) {
+        notify('Failed to load template: ' + error.message, 5);
+        console.error('Template load failed:', error);
+    }
+}
+
+
 function importCard(cardObject) {
 	scryfallCard = cardObject;
 	const importIndex = document.querySelector('#import-index');
@@ -6140,6 +6222,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	initDraggableArt();
     populateDirectoryDropdown();
 	//createSetSymbolGrid();
+	loadTemplatesList();
     
 });
 

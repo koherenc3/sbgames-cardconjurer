@@ -172,7 +172,7 @@
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "setSymbol")'>Set Symbol</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "watermark")'>Watermark</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "bottomInfo")'>Collector</h3>
-					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "import")'>Save/Load</h3>
+					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "import")'>Templates</h3>
 					
 				
 				</div>
@@ -773,16 +773,41 @@
 							</div>
 						</div>
 					</div>
+					
 					<div id='creator-menu-import' class='hidden'>
 						<div class='readable-background margin-bottom padding'>
+							<h3 class='padding margin-bottom input-description'>Template Management</h3>
+							<hr class="solid">
+							<div class="template-controls">
+								<!--<div class='input-grid margin-bottom'>
+									<input id='template-name' type='text' class='input' placeholder='Template Name'>
+									<button onclick='saveAsTemplate()' class='input'>Save Current Card as Template</button>
+								</div>-->
+								
+								<h4>Available Templates</h4>
+								<select id="templates-list" class="input margin-bottom" size="5" style="height: auto;">
+									<option disabled selected>No templates available</option>
+								</select>
+								
+								<div class='input-grid'>
+									<button onclick='loadSelectedTemplate()' class='input'>Load Selected Template</button>
+									<!--<button onclick='deleteSelectedTemplate()' class='input'>Delete Selected Template</button> -->
+								</div>
+							</div>
+						</div>
+						<div class='readable-background margin-bottom padding'>
 							<div class='readable-background margin-bottom padding'>
-								<h3 class='padding margin-bottom input-description'><u>Load a saved card</u></h3>
+								<h3 class='padding margin-bottom input-description'>Load a saved card</h3>
+								<hr class="solid">
 								
 									<h5 class='margin-bottom padding input-description'>Drag and drop .cardconjurer file</h5>
 									<input type='file' accept='.cardconjurer' placeholder='Raw Card File Upload' class='input' onchange='loadCardFromFile(event)'>
 								
-							</div>
-							<h3 class='padding margin-bottom input-description'><u>Import a real card by name</u></h3>
+							</div>	
+						</div>
+						<div class='readable-background margin-bottom padding'>
+						<h3 class='padding margin-bottom input-description'>Import a real card by name</h3>
+							<hr class="solid">
 							<input id='import-name' class='input margin-bottom' type='text' onchange='importChanged();' placeholder='Enter Card Name'>
 							<label class='checkbox-container input margin-bottom'>Include all unique prints as options
 								<input id='importAllPrints' type='checkbox' onchange="importChanged();">
@@ -806,7 +831,6 @@
 								<option value="ph">Phyrexian</option>
 							</select>
 						</div>
-						
 					</div>					
 				</div>
 				<div class='readable-background padding margin-bottom'>
