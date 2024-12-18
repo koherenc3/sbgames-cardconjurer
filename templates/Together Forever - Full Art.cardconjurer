@@ -5,6 +5,17 @@
   "marginY": 0,
   "frames": [
     {
+      "name": "Multicolored Holo Stamp",
+      "src": "/img/frames/m15/holoStamps/m15HoloStampM.png",
+      "bounds": {
+        "x": 0.436,
+        "y": 0.9034,
+        "width": 0.128,
+        "height": 0.0458
+      },
+      "masks": []
+    },
+    {
       "name": "Multicolored Legend Crown",
       "src": "/img/frames/m15/crowns/m15CrownMFloating.png",
       "bounds": {
@@ -220,7 +231,7 @@
       "x": 0.086,
       "y": 0.7143,
       "width": 0.828,
-      "height": 0.2048,
+      "height": 0.18761904761904763,
       "size": 0.0362,
       "color": "white",
       "shadowX": 0.0014,
