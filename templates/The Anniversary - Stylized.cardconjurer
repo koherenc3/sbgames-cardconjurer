@@ -5,66 +5,30 @@
   "marginY": 0,
   "frames": [
     {
-      "name": "Multicolored Holo Stamp",
-      "src": "/img/frames/m15/holoStamps/m15HoloStampM.png",
+      "name": "Green Holo Stamp",
+      "src": "/img/frames/enchantingTales/stamp/g.png",
       "bounds": {
-        "x": 0.436,
-        "y": 0.9034,
-        "width": 0.128,
-        "height": 0.0458
+        "x": 0.4427860696517413,
+        "y": 0.9054726368159204,
+        "width": 0.11393034825870647,
+        "height": 0.046908315565031986
       },
       "masks": []
     },
     {
-      "name": "Multicolored Legend Crown",
-      "src": "/img/frames/m15/crowns/m15CrownM.png",
-      "masks": [],
-      "bounds": {
-        "x": 0.0274,
-        "y": 0.0191,
-        "width": 0.9454,
-        "height": 0.1667
-      },
-      "complementary": [
-        9
-      ]
-    },
-    {
-      "name": "Legend Crown Border Cover",
-      "src": "/img/black.png",
-      "bounds": {
-        "x": 0.0394,
-        "y": 0.0277,
-        "width": 0.9214,
-        "height": 0.0177
-      },
-      "masks": []
-    },
-    {
-      "name": "Multicolored Power/Toughness",
-      "src": "/img/frames/m15/regular/m15PTM.png",
-      "bounds": {
-        "x": 0.7573,
-        "y": 0.8848,
-        "width": 0.188,
-        "height": 0.0733
-      },
-      "masks": []
-    },
-    {
-      "name": "Multicolored Frame",
-      "src": "/img/frames/m15/regular/m15FrameM.png",
+      "name": "Green Frame",
+      "src": "/img/frames/enchantingTales/g.png",
       "masks": []
     }
   ],
-  "artSource": "http://127.0.0.1:5500/img/blank.png",
-  "artX": 0.07666666666666666,
-  "artY": 0.03190476190476191,
-  "artZoom": 1271,
+  "artSource": "http://localhost:5500/img/blank.png",
+  "artX": -0.10666666666666667,
+  "artY": 0.05285714285714286,
+  "artZoom": 1821,
   "artRotate": "0",
   "setSymbolSource": "http://127.0.0.1:5500/img/setSymbols/official/sld-m.svg",
   "setSymbolX": 0.8013333333333333,
-  "setSymbolY": 0.5728571428571428,
+  "setSymbolY": 0.5752380952380952,
   "setSymbolZoom": 1.538,
   "watermarkSource": "http://127.0.0.1:5500/img/blank.png",
   "watermarkX": 0.33866666666666667,
@@ -73,7 +37,7 @@
   "watermarkLeft": "#b79d58",
   "watermarkRight": "none",
   "watermarkOpacity": 0.4,
-  "version": "m15Regular",
+  "version": "enchantingTales",
   "manaSymbols": [],
   "infoYear": "2024",
   "margins": false,
@@ -85,7 +49,7 @@
   "bottomInfoZoom": 1,
   "bottomInfoColor": "white",
   "onload": null,
-  "hideBottomInfoBorder": false,
+  "hideBottomInfoBorder": true,
   "showsFlavorBar": true,
   "bottomInfo": {
     "midLeft": {
@@ -181,14 +145,14 @@
     }
   },
   "artBounds": {
-    "x": 0.0767,
-    "y": 0.1129,
-    "width": 0.8476,
-    "height": 0.4429
+    "x": 0,
+    "y": 0.05285714285714286,
+    "width": 1,
+    "height": 0.8671428571428571
   },
   "setSymbolBounds": {
     "x": 0.9213,
-    "y": 0.591,
+    "y": 0.5933333333333334,
     "width": 0.12,
     "height": 0.041,
     "vertical": "center",
@@ -203,9 +167,9 @@
   "text": {
     "mana": {
       "name": "Mana Cost",
-      "text": "{W}{U}{B}{R}{G}",
-      "y": 0.0613,
-      "width": 0.9292,
+      "text": "",
+      "y": 0.06,
+      "width": 0.9266666666666666,
       "height": 0.03380952380952381,
       "oneLine": true,
       "size": 0.043345543345543344,
@@ -217,9 +181,9 @@
     },
     "title": {
       "name": "Title",
-      "text": "Together Forever",
+      "text": "The Anniversary",
       "x": 0.0854,
-      "y": 0.0522,
+      "y": 0.049523809523809526,
       "width": 0.8292,
       "height": 0.0543,
       "oneLine": true,
@@ -228,9 +192,9 @@
     },
     "type": {
       "name": "Type",
-      "text": "Legendary - Couple",
+      "text": "Legendary Enchantment",
       "x": 0.0854,
-      "y": 0.5664,
+      "y": 0.5680952380952381,
       "width": 0.8292,
       "height": 0.0543,
       "oneLine": true,
@@ -239,18 +203,19 @@
     },
     "rules": {
       "name": "Rules Text",
-      "text": "Whenever ~ enters the battlefield, both players win the game immediately.{flavor}“There is no remedy for love but to love more.” -  Henry David Thoreau",
+      "text": "Indestructible and hexproof.\n{i}Celebrate{/i} - When ~ enters the battlefield, each creatre you control gains +1/+1 for every year celebrated.{flavor}“In all the world, there is no heart for me like yours. In all the world, there is no love for you like mine.”",
       "x": 0.086,
-      "y": 0.6303,
+      "y": 0.6266666666666667,
       "width": 0.828,
       "height": 0.2875,
-      "size": 0.0362
+      "size": 0.0362,
+      "color": "white"
     },
     "pt": {
       "name": "Power/Toughness",
-      "text": "∞/∞",
-      "x": 0.7928,
-      "y": 0.902,
+      "text": "",
+      "x": 0.7985074626865671,
+      "y": 0.9019189765458422,
       "width": 0.1367,
       "height": 0.0372,
       "size": 0.0372,

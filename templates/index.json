@@ -6,5 +6,13 @@
     "Together Forever - Full Art": {
         "path": "/templates/Together Forever - Full Art.cardconjurer",
         "description": "Full Art Borderless version of Together Forever"
+    },
+    "The Anniversary - Enchanting Tales Frame": {
+        "path": "/templates/The Anniversary - Stylized.cardconjurer",
+        "description": "Basic Card using Together Forever"
+    },
+    "The Anniversary - Fallout Frame": {
+        "path": "/templates/The Anniversary - Fallout.cardconjurer",
+        "description": "Basic Card using Together Forever"
     }
 }
