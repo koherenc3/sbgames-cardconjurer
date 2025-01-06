@@ -3520,7 +3520,13 @@ function textboxEditor() {
 	document.querySelector('#textbox-editor-height').onchange = (event) => {selectedTextbox.height = (event.target.value / card.height); textEdited();}
 }
 function textEdited() {
+	console.log("6. Inside textEdited - mana text value:", card.text.mana.text);
+	const currentManaCost = card.text.mana.text;
 	card.text[Object.keys(card.text)[selectedTextIndex]].text = curlyQuotes(document.querySelector('#text-editor').value);
+	// Restore the mana cost after changes
+	if (currentManaCost) {
+		card.text.mana.text = currentManaCost;
+	  }
 	drawTextBuffer();
 	autoFrameBuffer();
 	
@@ -6120,13 +6126,219 @@ function toggleHighRes() {
 }
 
 
-//START TEST STUFF
 
+//Claude Integration Start
 
+// HTML template for the generator UI
+const cardGeneratorHTML = `
+  <div class='readable-background padding margin-bottom'>
+    <h5 class='margin-bottom padding input-description'>Enter customer request or card concept</h5>
+    <textarea id='card-generator-input' class='input margin-bottom' 
+      placeholder="Example: A blue control creature that helps you draw cards when you cast enchantments">
+    </textarea>
+    <div class='input-grid'>
+      <button id='generate-card-btn' class='input'>Generate Card</button>
+    </div>
+  </div>
+`;
 
-// END TEST STUFF
+// Function to parse Claude's response into card data
+function parseClaudeResponse(response) {
+	const cardData = {
+	  NAME: '',
+	  COST: '',
+	  TYPE: '',
+	  TEXT: '',
+	  'P/T': ''
+	};
+  
+	let currentField = '';
+	const lines = response.split('\n');
+	let flavorText = '';
+  
+	for (let line of lines) {
+	  line = line.trim();
+	  if (!line) continue;
+  
+	  // Check for flavor text (anything in quotes)
+	  if (line.match(/^".*"$/)) {
+		flavorText = line;
+		continue;
+	  }
+  
+	  const fieldMatch = line.match(/^(NAME|COST|TYPE|TEXT|P\/T):\s*(.*)/);
+	  if (fieldMatch) {
+		currentField = fieldMatch[1];
+		cardData[currentField] = fieldMatch[2];
+	  } else if (currentField === 'TEXT') {
+		if (cardData['TEXT']) {
+		  cardData['TEXT'] += '\n' + line;
+		} else {
+		  cardData['TEXT'] += line;
+		}
+	  }
+	}
+  
+	// Clean up any quote marks and trailing spaces
+	for (let key in cardData) {
+	  cardData[key] = cardData[key].trim().replace(/^"(.*)"$/, '$1');
+	}
+  
+	// Add flavor text to the end of rules text with proper formatting
+	if (flavorText) {
+	  cardData.TEXT = cardData.TEXT + '{flavor}' + flavorText.replace(/^"(.*)"$/, '$1');
+	}
+  
+	return cardData;
+  }
 
+// Function to update the card with generated data
+function updateCardFields(cardData) {
+  // Update title
+  if (cardData.NAME && card.text.title) {
+    card.text.title.text = cardData.NAME;
+  }
+  
+  // Update mana cost
+  if (cardData.COST && card.text.mana) {
+	console.log(cardData.COST);
+    card.text.mana.text = cardData.COST;
+	console.log("After setting - mana text is now:", card.text.mana.text);
+	console.log(Object.keys(card.text))
+  }
+  
+  // Update type line
+  if (cardData.TYPE && card.text.type) {
+    card.text.type.text = cardData.TYPE;
+  }
+  
+  // Update rules text
+  if (cardData.TEXT && card.text.rules) {
+    card.text.rules.text = cardData.TEXT;
+  }
+  
+  // Update P/T if present
+  if (cardData['P/T'] && card.text.pt) {
+    card.text.pt.text = cardData['P/T'];
+  }
+  
+  // Redraw the card
+  console.log("4. Card text mana before textEdited():", card.text.mana.text);
+  
+  textEdited();
+  console.log("5. Card text mana after textEdited():", card.text.mana.text);
+  drawCard();
+}
 
+async function callClaudeAPI(prompt) {
+	try {
+	  const response = await fetch('https://api.anthropic.com/v1/messages', {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json',
+		  'x-api-key': '', // Add your API key here
+		  'anthropic-version': '2023-06-01',
+		  'anthropic-dangerous-direct-browser-access': 'true'
+		},
+		body: JSON.stringify({
+		  model: "claude-3-opus-20240229",
+		  max_tokens: 1024,
+		  messages: [{
+			role: "user",
+			content: prompt
+		  }]
+		})
+	  });
+  
+	  if (!response.ok) {
+		throw new Error('API request failed');
+	  }
+  
+	  const data = await response.json();
+	  return data.content[0].text; // Claude API returns response in this format
+	} catch (error) {
+	  console.error('API call failed:', error);
+	  throw error;
+	}
+  }
+// Function to generate card text
+async function generateCard() {
+  const input = document.getElementById('card-generator-input').value;
+  const generateBtn = document.getElementById('generate-card-btn');
+  
+  if (!input.trim()) {
+    return;
+  }
+  
+  // Disable button and show loading state
+  generateBtn.disabled = true;
+  generateBtn.textContent = 'Generating...';
+  
+  try {
+    // Construct prompt for Claude
+    const prompt = `Given this customer request for a Magic card: "${input}"
+    Please generate:
+    1. A card name
+    2. Mana cost
+    3. Card type line
+    4. Rules text
+    5. Power/toughness (if creature)
+    Format the response like:
+    NAME: [card name]
+    COST: [mana cost]
+    TYPE: [type line] 
+    TEXT: [rules text]
+    P/T: [power/toughness]
+	
+	Also if the card name is referenced in the rules text, please us a ~ character instead of typing the full card name, return mana cost values back using the 
+	appropriate brackets around the symbol name.`;
+
+    // Get response from Claude
+    const response = await callClaudeAPI(prompt);
+    
+    // Parse response and update card
+	console.log(response);
+    const cardData = parseClaudeResponse(response);
+	console.log(cardData);
+    updateCardFields(cardData);
+    
+    // Trigger autoframe if enabled
+    if (document.getElementById('autoFrame').value !== 'false') {
+      autoFrame();
+    }
+  } catch (error) {
+    console.error('Error generating card:', error);
+    notify('Error generating card. Please try again.', 5);
+  } finally {
+    // Reset button state
+    generateBtn.disabled = false;
+    generateBtn.textContent = 'Generate Card';
+  }
+}
+
+// Function to initialize the generator UI
+function initializeCardGenerator() {
+  // Add the generate tab to creator menu tabs
+  const menuTabs = document.getElementById('creator-menu-tabs');
+  const generateTab = document.createElement('h3');
+  generateTab.className = 'selectable readable-background';
+  generateTab.onclick = (event) => toggleCreatorTabs(event, 'generate');
+  generateTab.textContent = 'Claude.ai';
+  menuTabs.appendChild(generateTab);
+  
+  // Add the generate section to creator menu sections
+  const menuSections = document.getElementById('creator-menu-sections');
+  const generateSection = document.createElement('div');
+  generateSection.id = 'creator-menu-generate';
+  generateSection.className = 'hidden';
+  generateSection.innerHTML = cardGeneratorHTML;
+  menuSections.appendChild(generateSection);
+  
+  // Add event listener to generate button
+  document.getElementById('generate-card-btn').onclick = generateCard;
+}
+
+//Claude Integration End
 
 
 // INITIALIZATION
@@ -6223,6 +6435,7 @@ document.addEventListener('DOMContentLoaded', () => {
     populateDirectoryDropdown();
 	//createSetSymbolGrid();
 	loadTemplatesList();
+	initializeCardGenerator();
     
 });
 
