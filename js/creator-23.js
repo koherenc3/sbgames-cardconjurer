@@ -3520,17 +3520,30 @@ function textboxEditor() {
 	document.querySelector('#textbox-editor-height').onchange = (event) => {selectedTextbox.height = (event.target.value / card.height); textEdited();}
 }
 function textEdited() {
+	
+	
+	card.text[Object.keys(card.text)[selectedTextIndex]].text = curlyQuotes(document.querySelector('#text-editor').value);
+	// Restore the mana cost after changes
+
+	drawTextBuffer();
+	autoFrameBuffer();
+	
+}
+
+function textEditedClaude() {
 	console.log("6. Inside textEdited - mana text value:", card.text.mana.text);
 	const currentManaCost = card.text.mana.text;
 	card.text[Object.keys(card.text)[selectedTextIndex]].text = curlyQuotes(document.querySelector('#text-editor').value);
 	// Restore the mana cost after changes
 	if (currentManaCost) {
 		card.text.mana.text = currentManaCost;
-	  }
+	}
 	drawTextBuffer();
 	autoFrameBuffer();
 	
 }
+
+
 function fontSizedEdited() {
 	const textKey = Object.keys(card.text)[selectedTextIndex];
     const newFontSize = document.querySelector('#text-editor-font-size').value;
@@ -6225,7 +6238,7 @@ function updateCardFields(cardData) {
   // Redraw the card
   console.log("4. Card text mana before textEdited():", card.text.mana.text);
   
-  textEdited();
+  textEditedClaude();
   console.log("5. Card text mana after textEdited():", card.text.mana.text);
   drawCard();
 }
