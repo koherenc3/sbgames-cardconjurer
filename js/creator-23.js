@@ -458,7 +458,7 @@ loadManaSymbols(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '
 loadManaSymbols(true, ['e', 'a']);
 loadManaSymbols(['wu', 'wb', 'ub', 'ur', 'br', 'bg', 'rg', 'rw', 'gw', 'gu', '2w', '2u', '2b', '2r', '2g', 'wp', 'up', 'bp', 'rp', 'gp', 'p',
 				 'wup', 'wbp', 'ubp', 'urp', 'brp', 'bgp', 'rgp', 'rwp', 'gwp', 'gup', 'purplew', 'purpleu', 'purpleb', 'purpler', 'purpleg',
-				 '2purple', 'purplep', 'cw', 'cu', 'cb', 'cr', 'cg'], [1.2, 1.2]);
+				 '2purple', 'purplep', 'cw', 'cu', 'cb', 'cr', 'cg', 'hrt'], [1.2, 1.2]);
 loadManaSymbols(['bar.png', 'whitebar.png']);
 loadManaSymbols(true, ['chaos'], [1.2, 1]);
 loadManaSymbols(true, ['tk'], [0.8, 1]);
@@ -4590,55 +4590,108 @@ function watermarkRightColor(c) {
 	watermarkEdited();
 }
 function watermarkEdited() {
-	card.watermarkSource = watermark.src;
-	card.watermarkX = document.querySelector('#watermark-x').value / card.width;
-	card.watermarkY = document.querySelector('#watermark-y').value / card.height;
-	card.watermarkZoom = document.querySelector('#watermark-zoom').value / 100;
-	if (card.watermarkLeft == "none" && document.querySelector('#watermark-left').value != "none") {
-		card.watermarkLeft = document.querySelector('#watermark-left').value;
-	}
-	// card.watermarkLeft = document.querySelector('#watermark-left').value;
-	// card.watermarkRight =  document.querySelector('#watermark-right').value;
-	card.watermarkOpacity = document.querySelector('#watermark-opacity').value / 100;
-	watermarkContext.globalCompositeOperation = 'source-over';
-	watermarkContext.globalAlpha = 1;
-	watermarkContext.clearRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-	if (card.watermarkLeft != 'none' && !card.watermarkSource.includes('/blank.png') && card.watermarkZoom > 0) {
-		if (card.watermarkRight != 'none') {
-			watermarkContext.drawImage(right, scaleX(0), scaleY(0), scaleWidth(1), scaleHeight(1));
-			watermarkContext.globalCompositeOperation = 'source-in';
-			if (card.watermarkRight == 'default') {
-				watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
-			} else {
-				watermarkContext.fillStyle = card.watermarkRight;
-				watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-			}
-			watermarkContext.globalCompositeOperation = 'destination-over';
-		}
-		if (card.watermarkLeft == 'default') {
-			watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
-		} else {
-			watermarkContext.fillStyle = card.watermarkLeft;
-			watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-		}
-		watermarkContext.globalCompositeOperation = 'destination-in';
-		watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
-		watermarkContext.globalAlpha = card.watermarkOpacity;
-		watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-	}
-	drawCard();
+    console.log('watermarkEdited() called');
+    console.log('Current watermark source:', card.watermarkSource);
+    
+    card.watermarkSource = watermark.src;
+    card.watermarkX = document.querySelector('#watermark-x').value / card.width;
+    card.watermarkY = document.querySelector('#watermark-y').value / card.height;
+    card.watermarkZoom = document.querySelector('#watermark-zoom').value / 100;
+    
+    console.log('Updated watermark values:', {
+        x: card.watermarkX,
+        y: card.watermarkY,
+        zoom: card.watermarkZoom,
+        width: watermarkCanvas.width,
+        height: watermarkCanvas.height
+    });
+    
+    if (card.watermarkLeft == "none" && document.querySelector('#watermark-left').value != "none") {
+        card.watermarkLeft = document.querySelector('#watermark-left').value;
+    }
+    
+    card.watermarkOpacity = document.querySelector('#watermark-opacity').value / 100;
+    console.log('Watermark opacity:', card.watermarkOpacity);
+    
+    watermarkContext.globalCompositeOperation = 'source-over';
+    watermarkContext.globalAlpha = 1;
+    watermarkContext.clearRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+    
+    if (card.watermarkLeft != 'none' && !card.watermarkSource.includes('/blank.png') && card.watermarkZoom > 0) {
+        // Special handling for draft watermark
+        const isDraftWatermark = card.watermarkSource.includes('/watermarks/draft.svg') || 
+                               decodeURIComponent(card.watermarkSource).includes('/watermarks/draft.svg');
+                               
+		console.log(decodeURIComponent(card.watermarkSource));
+        console.log('Checking if draft watermark:', isDraftWatermark);
+                               
+        if (isDraftWatermark) {
+            console.log('Drawing draft watermark at full canvas size');
+            // Fill the entire card frame
+            watermarkContext.drawImage(watermark, 0, 0, watermarkCanvas.width, watermarkCanvas.height);
+            watermarkContext.globalAlpha = card.watermarkOpacity;
+            watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+        } else {
+            console.log('Drawing normal watermark');
+            // Normal watermark handling
+            if (card.watermarkRight != 'none') {
+                console.log('Drawing right half watermark');
+                watermarkContext.drawImage(right, scaleX(0), scaleY(0), scaleWidth(1), scaleHeight(1));
+                watermarkContext.globalCompositeOperation = 'source-in';
+                if (card.watermarkRight == 'default') {
+                    watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), 
+                        watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
+                } else {
+                    watermarkContext.fillStyle = card.watermarkRight;
+                    watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+                }
+                watermarkContext.globalCompositeOperation = 'destination-over';
+            }
+            
+            if (card.watermarkLeft == 'default') {
+                console.log('Drawing default left watermark');
+                watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), 
+                    watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
+            } else {
+                console.log('Drawing colored left watermark:', card.watermarkLeft);
+                watermarkContext.fillStyle = card.watermarkLeft;
+                watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+            }
+            
+            watermarkContext.globalCompositeOperation = 'destination-in';
+            watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), 
+                watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
+            watermarkContext.globalAlpha = card.watermarkOpacity;
+            watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+        }
+    } else {
+        console.log('Skipping watermark drawing - conditions not met:', {
+            watermarkLeft: card.watermarkLeft,
+            isBlank: card.watermarkSource.includes('/blank.png'),
+            zoom: card.watermarkZoom
+        });
+    }
+    drawCard();
 }
 function resetWatermark() {
-	var watermarkZoom;
-	if (watermark.width / watermark.height > scaleWidth(card.watermarkBounds.width) / scaleHeight(card.watermarkBounds.height)) {
-		watermarkZoom = (scaleWidth(card.watermarkBounds.width) / watermark.width * 100).toFixed(1);
-	} else {
-		watermarkZoom = (scaleHeight(card.watermarkBounds.height) / watermark.height * 100).toFixed(1);
-	}
-	document.querySelector('#watermark-zoom').value = watermarkZoom;
-	document.querySelector('#watermark-x').value = Math.round(scaleX(card.watermarkBounds.x) - watermark.width * watermarkZoom / 200 - scaleWidth(card.marginX));
-	document.querySelector('#watermark-y').value = Math.round(scaleY(card.watermarkBounds.y) - watermark.height * watermarkZoom / 200 - scaleHeight(card.marginY));
-	watermarkEdited();
+    // For draft watermark, set to fill entire card
+    if (watermark.src.includes('/watermarks/draft.svg')) {
+        document.querySelector('#watermark-x').value = 0;
+        document.querySelector('#watermark-y').value = 0;
+        document.querySelector('#watermark-zoom').value = 100;
+    } else {
+        // Normal watermark positioning
+        var watermarkZoom;
+        if (watermark.width / watermark.height > scaleWidth(card.watermarkBounds.width) / scaleHeight(card.watermarkBounds.height)) {
+            watermarkZoom = (scaleWidth(card.watermarkBounds.width) / watermark.width * 100).toFixed(1);
+        } else {
+            watermarkZoom = (scaleHeight(card.watermarkBounds.height) / watermark.height * 100).toFixed(1);
+        }
+        document.querySelector('#watermark-zoom').value = watermarkZoom;
+        document.querySelector('#watermark-x').value = Math.round(scaleX(card.watermarkBounds.x) - watermark.width * watermarkZoom / 200 - scaleWidth(card.marginX));
+        document.querySelector('#watermark-y').value = Math.round(scaleY(card.watermarkBounds.y) - watermark.height * watermarkZoom / 200 - scaleHeight(card.marginY));
+    }
+    watermarkEdited();
 }
 //svg cropper
 function getSetSymbolWatermark(url, targetImage = watermark) {

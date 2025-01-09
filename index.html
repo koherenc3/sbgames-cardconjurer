@@ -298,6 +298,9 @@
 									<button class='input mana-symbol-button' onclick="insertSymbol('C')" title="Colorless Mana">
 										<img src="/img/manaSymbols/c.svg" alt="C" style="width: 25px; height: 25px;">
 									</button>
+									<button class='input mana-symbol-button' onclick="insertSymbol('hrt')" title="Heart Mana">
+										<img src="/img/manaSymbols/hrt.svg" alt="C" style="width: 25px; height: 25px;">
+									</button>
 									
 									<!-- Numbers -->
 									<button class='input mana-symbol-button' onclick="insertSymbol('0')" title="Zero Mana">
@@ -569,6 +572,8 @@
 							<h5 class='margin-bottom padding input-description'>Select lore-based watermarks</h5>
 							<select class='input padding margin-bottom' onchange='getSetSymbolWatermark(fixUri(this.value));'>
 								<option disabled selected='selected'>None</option>
+								<option disabled>Draft Watermark</option>
+								<option value="img/watermarks/draft.svg">Spellblade Games Watermark</option>
 								<option disabled>General</option>
 								<option value="/img/watermarks/planeswalker.svg">Planeswalker</option>
 								<option value="/img/watermarks/desparked-planeswalker.svg">Desparked Planeswalker</option>
