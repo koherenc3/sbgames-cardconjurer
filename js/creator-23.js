@@ -4590,21 +4590,12 @@ function watermarkRightColor(c) {
 	watermarkEdited();
 }
 function watermarkEdited() {
-    console.log('watermarkEdited() called');
-    console.log('Current watermark source:', card.watermarkSource);
+     
     
     card.watermarkSource = watermark.src;
     card.watermarkX = document.querySelector('#watermark-x').value / card.width;
     card.watermarkY = document.querySelector('#watermark-y').value / card.height;
     card.watermarkZoom = document.querySelector('#watermark-zoom').value / 100;
-    
-    console.log('Updated watermark values:', {
-        x: card.watermarkX,
-        y: card.watermarkY,
-        zoom: card.watermarkZoom,
-        width: watermarkCanvas.width,
-        height: watermarkCanvas.height
-    });
     
     if (card.watermarkLeft == "none" && document.querySelector('#watermark-left').value != "none") {
         card.watermarkLeft = document.querySelector('#watermark-left').value;
@@ -4616,20 +4607,21 @@ function watermarkEdited() {
     watermarkContext.globalCompositeOperation = 'source-over';
     watermarkContext.globalAlpha = 1;
     watermarkContext.clearRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-    
+    console.log(document.querySelector('#watermark-selection').value);
     if (card.watermarkLeft != 'none' && !card.watermarkSource.includes('/blank.png') && card.watermarkZoom > 0) {
         // Special handling for draft watermark
-        const isDraftWatermark = card.watermarkSource.includes('/watermarks/draft.svg') || 
-                               decodeURIComponent(card.watermarkSource).includes('/watermarks/draft.svg');
+		currentFile = document.querySelector('#watermark-selection').value;
+        const isDraftWatermark = card.watermarkSource.includes('/watermarks/draft.svg') || currentFile == "img/watermarks/draft.svg";
                                
-		console.log(decodeURIComponent(card.watermarkSource));
+		
+		
         console.log('Checking if draft watermark:', isDraftWatermark);
                                
         if (isDraftWatermark) {
             console.log('Drawing draft watermark at full canvas size');
             // Fill the entire card frame
             watermarkContext.drawImage(watermark, 0, 0, watermarkCanvas.width, watermarkCanvas.height);
-            watermarkContext.globalAlpha = card.watermarkOpacity;
+            watermarkContext.globalAlpha = 0;
             watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
         } else {
             console.log('Drawing normal watermark');
