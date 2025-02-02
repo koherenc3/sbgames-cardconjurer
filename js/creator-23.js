@@ -6371,7 +6371,7 @@ async function callClaudeAPI(prompt) {
 		method: 'POST',
 		headers: {
 		  'Content-Type': 'application/json',
-		  'x-api-key': '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', // Add your API key here
+		  'x-api-key': '', // Add your API key here
 		  'anthropic-version': '2023-06-01',
 		  'anthropic-dangerous-direct-browser-access': 'true'
 		},
