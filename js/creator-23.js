@@ -4935,6 +4935,83 @@ function drawCard() {
 	previewContext.drawImage(cardCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
 }
 //DOWNLOADING
+async function downloadCard(alt = false, jpeg = false) {
+    // Prep file information
+    var imageDataURL;
+    var imageName = getCardName();
+    var extension = jpeg ? '.jpeg' : '.png';
+    imageName = imageName + extension;
+    
+    if (jpeg) {
+        imageDataURL = cardCanvas.toDataURL('image/jpeg', 0.8);
+    } else {
+        imageDataURL = cardCanvas.toDataURL('image/png');
+    }
+
+    try {
+        // Check if we have a valid directory handle
+        if (!savedDirHandle) {
+            await rememberDirectory();
+            if (!savedDirHandle) {
+                throw new Error('No directory selected for saving');
+            }
+        }
+
+        // Convert the data URL to a blob
+        const fetchResponse = await fetch(imageDataURL);
+        const blob = await fetchResponse.blob();
+
+        // Save to the selected directory using the File System API
+        const fileHandle = await savedDirHandle.getFileHandle(imageName, {create: true});
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+
+        // Notify user of successful save
+        notify(`Card image "${imageName}" has been saved to ${savedDirHandle.name}`, 5);
+
+    } catch (error) {
+        // If directory access fails, fall back to download method
+        if (error.name === 'NotAllowedError' || error.message.includes('directory')) {
+            try {
+                // Create link to download
+                const downloadElement = document.createElement('a');
+                downloadElement.download = imageName;
+                downloadElement.target = '_blank';
+                downloadElement.href = imageDataURL;
+                
+                // Trigger download
+                document.body.appendChild(downloadElement);
+                downloadElement.click();
+                
+                // Cleanup
+                window.URL.revokeObjectURL(downloadElement.href);
+                downloadElement.remove();
+                
+                notify(`Card image "${imageName}" has been downloaded (directory access failed)`, 3);
+            } catch (downloadError) {
+                notify('Failed to save card image: ' + downloadError.message);
+                console.error('Save failed:', downloadError);
+            }
+        } else {
+            notify('Failed to save card image: ' + error.message);
+            console.error('Save failed:', error);
+        }
+    }
+
+    // Handle alt case (opening in new window)
+    if (alt) {
+        const newWindow = window.open('about:blank');
+        setTimeout(function(){
+            newWindow.document.body.appendChild(newWindow.document.createElement('img')).src = imageDataURL;
+            newWindow.document.querySelector('img').style = 'max-height: 100vh; max-width: 100vw;';
+            newWindow.document.body.style = 'padding: 0; margin: 0; text-align: center; background-color: #888;';
+            newWindow.document.title = imageName;
+        }, 0);
+    }
+}
+
+/* Old Function
 function downloadCard(alt = false, jpeg = false) {
 		// Prep file information
 		var imageDataURL;
@@ -4966,7 +5043,7 @@ function downloadCard(alt = false, jpeg = false) {
 		}
 	
 }
-
+*/ 
 //IMPORT/SAVE TAB
 async function loadTemplatesList() {
     const templatesList = document.querySelector('#templates-list');
@@ -6294,7 +6371,7 @@ async function callClaudeAPI(prompt) {
 		method: 'POST',
 		headers: {
 		  'Content-Type': 'application/json',
-		  'x-api-key': '', // Add your API key here
+		  'x-api-key': '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', // Add your API key here
 		  'anthropic-version': '2023-06-01',
 		  'anthropic-dangerous-direct-browser-access': 'true'
 		},
